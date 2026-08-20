@@ -1,0 +1,1 @@
+{"compilerOptions":{"strict":true,"target":"ES2022","module":"NodeNext","moduleResolution":"NodeNext","verbatimModuleSyntax":true,"skipLibCheck":true,"baseUrl":".","paths":{"@rezili/risk-core":["../risk-core/src/index.ts"],"@rezili/trigger-core":["../trigger-core/src/index.ts"]}},"include":["src/**/*.ts"]}
