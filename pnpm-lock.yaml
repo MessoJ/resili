@@ -175,6 +175,18 @@ importers:
         specifier: ^3.1.4
         version: 3.2.7(@types/node@22.20.1)
 
+  packages/ussd-core:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.3
+        version: 22.20.1
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+      vitest:
+        specifier: ^3.1.4
+        version: 3.2.7(@types/node@22.20.1)
+
   services/api-gateway:
     dependencies:
       '@rezili/api-contract':
