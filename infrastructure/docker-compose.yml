@@ -1,0 +1,19 @@
+services:
+  postgis:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: rezili
+      POSTGRES_USER: rezili
+      POSTGRES_PASSWORD: rezili
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rezili -d rezili"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - postgis-data:/var/lib/postgresql/data
+
+volumes:
+  postgis-data:
