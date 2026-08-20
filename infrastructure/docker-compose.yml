@@ -14,6 +14,47 @@ services:
       retries: 12
     volumes:
       - postgis-data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d/migrations
+      - ./data:/docker-entrypoint-initdb.d/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  forecast-ingest:
+    build:
+      context: ../services/forecast-ingest
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      DATABASE_URL: postgresql://rezili:rezili@postgis:5432/rezili
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgis:
+        condition: service_healthy
+
+  gateway:
+    build:
+      context: ../services/gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      GATEWAY_PORT: "8080"
+      ML_SERVICE_URL: http://forecast-ingest:8001
+      DATABASE_URL: postgresql://rezili:rezili@postgis:5432/rezili
+    depends_on:
+      postgis:
+        condition: service_healthy
+      forecast-ingest:
+        condition: service_started
 
 volumes:
   postgis-data:

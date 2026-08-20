@@ -1,0 +1,21 @@
+{
+  "model_version": "risk-ml-v0.1.0",
+  "feature_names": [
+    "precip_3day_sum",
+    "precip_5day_sum",
+    "precip_max_daily",
+    "discharge_ratio",
+    "discharge_trend",
+    "rainfall_anomaly",
+    "antecedent_moisture",
+    "exposure_score",
+    "vulnerability_score",
+    "flood_plain_fraction",
+    "historical_flood_frequency"
+  ],
+  "metrics": {
+    "accuracy": 1.0,
+    "f1": 1.0,
+    "auc_roc": 1.0
+  }
+}

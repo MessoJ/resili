@@ -12,5 +12,5 @@ coverage/
 __pycache__/
 .pytest_cache/
 *.py[cod]
-data/
-!infrastructure/data/.gitkeep
+/data/
+!infrastructure/data/
