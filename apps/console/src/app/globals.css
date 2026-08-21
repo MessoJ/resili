@@ -760,6 +760,150 @@ code, .mono { font-family: var(--font-mono); }
   transition: background var(--transition-fast), border-color var(--transition-fast);
 }
 
+/* ── Basin Summary ──────────────────────────────────────── */
+
+.basin-summary {
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.basin-summary__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+  margin-bottom: 12px;
+}
+
+.basin-summary__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.basin-summary__stat-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.basin-summary__stat-value {
+  font-family: var(--font-mono);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--text-primary);
+}
+
+.basin-summary__stat-suffix {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-left: 1px;
+}
+
+/* Highest-risk ward: a quiet, tappable jump-to-worst affordance with the
+   familiar risk spine on its leading edge. */
+.basin-summary__peak {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px 10px 15px;
+  margin-bottom: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  overflow: hidden;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.basin-summary__peak::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--spine, transparent);
+}
+
+.basin-summary__peak:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-strong);
+}
+
+.basin-summary__peak-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.basin-summary__peak-name {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.basin-summary__peak-score {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+}
+
+/* Segmented risk-distribution band: one continuous bar whose parts are sized
+   by the number of wards in each risk band. Reads like a tiny stacked gauge. */
+.basin-summary__dist {
+  display: flex;
+  height: 8px;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  background: var(--bg-inset);
+  gap: 2px;
+}
+
+.basin-summary__dist-seg {
+  min-width: 4px;
+  transition: flex-grow var(--transition-slow);
+}
+
+.basin-summary__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 9px;
+}
+
+.basin-summary__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+.basin-summary__legend-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+
 /* ── Responsive ─────────────────────────────────────────── */
 
 @media (max-width: 1024px) {

@@ -67,6 +67,21 @@ services:
       GATEWAY_PORT: "8080"
       ML_SERVICE_URL: http://forecast-ingest:8001
       DATABASE_URL: postgresql://resili:resili@postgis:5432/resili
+      # Payments: leave PAYOUT_ADAPTER=mock for a deterministic demo, or set it
+      # to "live" (with the credentials below) to hit the real Daraja / Africa's
+      # Talking sandboxes. Values are read from infrastructure/.env if present.
+      PAYOUT_ADAPTER: ${PAYOUT_ADAPTER:-mock}
+      DARAJA_ENV: ${DARAJA_ENV:-sandbox}
+      DARAJA_CONSUMER_KEY: ${DARAJA_CONSUMER_KEY:-}
+      DARAJA_CONSUMER_SECRET: ${DARAJA_CONSUMER_SECRET:-}
+      DARAJA_BUSINESS_SHORT_CODE: ${DARAJA_BUSINESS_SHORT_CODE:-}
+      DARAJA_INITIATOR_NAME: ${DARAJA_INITIATOR_NAME:-}
+      DARAJA_SECURITY_CREDENTIAL: ${DARAJA_SECURITY_CREDENTIAL:-}
+      DARAJA_B2C_RESULT_URL: ${DARAJA_B2C_RESULT_URL:-}
+      DARAJA_QUEUE_TIMEOUT_URL: ${DARAJA_QUEUE_TIMEOUT_URL:-}
+      AFRICAS_TALKING_USERNAME: ${AFRICAS_TALKING_USERNAME:-sandbox}
+      AFRICAS_TALKING_API_KEY: ${AFRICAS_TALKING_API_KEY:-}
+      AFRICAS_TALKING_SENDER: ${AFRICAS_TALKING_SENDER:-}
     depends_on:
       postgis:
         condition: service_healthy

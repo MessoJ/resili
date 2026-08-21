@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -8,6 +9,8 @@ import (
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/resili/gateway/internal/payments"
 )
 
 // TriggerHandler manages anticipatory action trigger decisions.
@@ -15,12 +18,19 @@ import (
 type TriggerHandler struct {
 	mu       sync.RWMutex
 	triggers map[string]*triggerRecord
+	payments *payments.Service
 }
 
-// NewTriggerHandler creates a trigger handler with in-memory store.
-func NewTriggerHandler() *TriggerHandler {
+// NewTriggerHandler creates a trigger handler with in-memory store and the
+// payout/notification service used to disburse anticipatory-action funds
+// and notify recipients when a trigger is eligible.
+func NewTriggerHandler(svc *payments.Service) *TriggerHandler {
+	if svc == nil {
+		svc = payments.NewService(payments.Config{})
+	}
 	return &TriggerHandler{
 		triggers: make(map[string]*triggerRecord),
+		payments: svc,
 	}
 }
 
@@ -31,6 +41,11 @@ type triggerRequest struct {
 	LeadDays       int        `json:"lead_days"`
 	IdempotencyKey string     `json:"idempotency_key"`
 	Approvals      []approval `json:"approvals"`
+	// Optional payout instruction. When RecipientMSISDN is set and the
+	// trigger is eligible, an M-Pesa B2C payout is initiated and an SMS is
+	// sent. PayoutAmount is in whole Kenyan shillings.
+	RecipientMSISDN string `json:"recipient_msisdn"`
+	PayoutAmount    int    `json:"payout_amount"`
 }
 
 type approval struct {
@@ -49,6 +64,11 @@ type triggerRecord struct {
 	IdempotencyKey string     `json:"idempotency_key"`
 	Approvals      []approval `json:"approvals"`
 	DecidedAt      string     `json:"decided_at"`
+	// Payout and Notification are populated for eligible triggers that carry
+	// a recipient MSISDN. They are nil for ineligible triggers or when no
+	// recipient was supplied.
+	Payout       *payments.PayoutResult `json:"payout,omitempty"`
+	Notification *payments.NotifyResult `json:"notification,omitempty"`
 }
 
 // CreateTrigger evaluates a trigger request and records the decision.
@@ -132,8 +152,55 @@ func (h *TriggerHandler) CreateTrigger(w http.ResponseWriter, r *http.Request) {
 		DecidedAt:      time.Now().UTC().Format(time.RFC3339),
 	}
 
+	// Disburse funds and notify the recipient only for eligible triggers
+	// that carry a recipient MSISDN. This is the anticipatory-action "money
+	// moment": M-Pesa B2C payout + an SMS advisory. The payout reference is
+	// derived from the audited decision hash so it is reconcilable.
+	if eligible && req.RecipientMSISDN != "" {
+		h.disburse(r.Context(), &req, record)
+	}
+
 	h.triggers[req.IdempotencyKey] = record
 	writeJSON(w, http.StatusCreated, record)
+}
+
+// disburse initiates the M-Pesa payout and citizen SMS for an eligible
+// trigger. Failures are recorded on the record (status "failed") rather
+// than aborting the decision — the audited decision stands regardless of
+// downstream provider availability.
+func (h *TriggerHandler) disburse(ctx context.Context, req *triggerRequest, record *triggerRecord) {
+	amount := req.PayoutAmount
+	if amount <= 0 {
+		amount = 2000 // default anticipatory-action cash transfer (KES)
+	}
+	ref := "AA-" + record.DecisionHash[:12]
+
+	payout, err := h.payments.Payer.Pay(ctx, payments.PayoutRequest{
+		Amount:    amount,
+		MSISDN:    req.RecipientMSISDN,
+		Reference: ref,
+		Remarks:   fmt.Sprintf("resili anticipatory action payout for %s", req.WardID),
+	})
+	if err != nil {
+		payout.Status = "failed"
+	}
+	record.Payout = &payout
+
+	// Climate-safety guardrail: communicate likelihood, attribute KMD/NDMA,
+	// never state flooding "will" happen.
+	msg := fmt.Sprintf(
+		"resili: Elevated flood risk likelihood in your ward (%.0f%%). "+
+			"Anticipatory support of KES %d is being sent. "+
+			"Follow KMD/NDMA and county directives. Ref %s",
+		record.RiskScore, amount, ref)
+	notify, nerr := h.payments.Notifier.Send(ctx, payments.SMS{
+		To:      []string{req.RecipientMSISDN},
+		Message: msg,
+	})
+	if nerr != nil {
+		notify.Status = "failed"
+	}
+	record.Notification = &notify
 }
 
 // GetTrigger returns a trigger record by ID.

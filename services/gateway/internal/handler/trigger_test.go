@@ -22,7 +22,7 @@ func postTrigger(t *testing.T, h *TriggerHandler, body string) (*httptest.Respon
 }
 
 func TestTriggerEligibleWithDualApproval(t *testing.T) {
-	h := NewTriggerHandler()
+	h := NewTriggerHandler(nil)
 	body := `{
 		"trigger_id": "TRG-001",
 		"ward_id": "KE-039-NYANDO",
@@ -47,8 +47,68 @@ func TestTriggerEligibleWithDualApproval(t *testing.T) {
 	}
 }
 
+func TestTriggerEligiblePayoutAndSMS(t *testing.T) {
+	h := NewTriggerHandler(nil) // mock payments adapter
+	body := `{
+		"trigger_id": "TRG-PAY-1",
+		"ward_id": "KE-039-NYANDO",
+		"risk_score": 96.7,
+		"lead_days": 4,
+		"idempotency_key": "idem-pay-1",
+		"recipient_msisdn": "254700000000",
+		"payout_amount": 2000,
+		"approvals": [
+			{"approver_id": "county-officer-1", "approved_at": "2026-08-21T10:00:00Z"},
+			{"approver_id": "red-cross-lead", "approved_at": "2026-08-21T10:05:00Z"}
+		]
+	}`
+
+	w, rec := postTrigger(t, h, body)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("expected 201, got %d", w.Code)
+	}
+	if !rec.Eligible {
+		t.Fatalf("expected eligible trigger, reason: %s", rec.Reason)
+	}
+	if rec.Payout == nil || rec.Payout.Status != "accepted" || rec.Payout.ConversationID == "" {
+		t.Fatalf("expected an accepted payout, got %+v", rec.Payout)
+	}
+	if rec.Notification == nil || rec.Notification.Status != "accepted" {
+		t.Fatalf("expected an accepted SMS notification, got %+v", rec.Notification)
+	}
+
+	// Idempotent replay must return the same payout, not a second disbursement.
+	_, rec2 := postTrigger(t, h, body)
+	if rec2.Payout == nil || rec2.Payout.ConversationID != rec.Payout.ConversationID {
+		t.Fatalf("idempotent replay changed the payout: %+v vs %+v", rec2.Payout, rec.Payout)
+	}
+}
+
+func TestTriggerIneligibleNoPayout(t *testing.T) {
+	h := NewTriggerHandler(nil)
+	body := `{
+		"trigger_id": "TRG-PAY-2",
+		"ward_id": "KE-039-RACHUONYO",
+		"risk_score": 20.0,
+		"lead_days": 5,
+		"idempotency_key": "idem-pay-2",
+		"recipient_msisdn": "254700000000",
+		"approvals": [
+			{"approver_id": "a", "approved_at": "t"},
+			{"approver_id": "b", "approved_at": "t"}
+		]
+	}`
+	_, rec := postTrigger(t, h, body)
+	if rec.Eligible {
+		t.Fatalf("expected ineligible trigger")
+	}
+	if rec.Payout != nil || rec.Notification != nil {
+		t.Fatalf("ineligible trigger must not disburse funds or notify: payout=%+v notify=%+v", rec.Payout, rec.Notification)
+	}
+}
+
 func TestTriggerRejectedSingleApprover(t *testing.T) {
-	h := NewTriggerHandler()
+	h := NewTriggerHandler(nil)
 	body := `{
 		"trigger_id": "TRG-002",
 		"ward_id": "KE-039-NYANDO",
@@ -70,7 +130,7 @@ func TestTriggerRejectedSingleApprover(t *testing.T) {
 }
 
 func TestTriggerRejectedLowRisk(t *testing.T) {
-	h := NewTriggerHandler()
+	h := NewTriggerHandler(nil)
 	body := `{
 		"trigger_id": "TRG-003",
 		"ward_id": "KE-039-RACHUONYO",
@@ -90,7 +150,7 @@ func TestTriggerRejectedLowRisk(t *testing.T) {
 }
 
 func TestTriggerIdempotency(t *testing.T) {
-	h := NewTriggerHandler()
+	h := NewTriggerHandler(nil)
 	body := `{
 		"trigger_id": "TRG-004",
 		"ward_id": "KE-039-NYANDO",
@@ -120,7 +180,7 @@ func TestTriggerIdempotency(t *testing.T) {
 }
 
 func TestTriggerDuplicateApproverNotCounted(t *testing.T) {
-	h := NewTriggerHandler()
+	h := NewTriggerHandler(nil)
 	body := `{
 		"trigger_id": "TRG-005",
 		"ward_id": "KE-039-NYANDO",
@@ -140,7 +200,7 @@ func TestTriggerDuplicateApproverNotCounted(t *testing.T) {
 }
 
 func TestTriggerMissingFields(t *testing.T) {
-	h := NewTriggerHandler()
+	h := NewTriggerHandler(nil)
 	body := `{"ward_id": "KE-039-NYANDO"}`
 
 	w, _ := postTrigger(t, h, body)
@@ -150,7 +210,7 @@ func TestTriggerMissingFields(t *testing.T) {
 }
 
 func TestGetTriggerByID(t *testing.T) {
-	h := NewTriggerHandler()
+	h := NewTriggerHandler(nil)
 	body := `{
 		"trigger_id": "TRG-006",
 		"ward_id": "KE-039-NYANDO",

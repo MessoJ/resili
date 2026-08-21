@@ -22,6 +22,7 @@ import (
 
 	"github.com/resili/gateway/internal/handler"
 	"github.com/resili/gateway/internal/middleware"
+	"github.com/resili/gateway/internal/payments"
 )
 
 func main() {
@@ -43,6 +44,26 @@ func main() {
 		mlServiceURL = "http://localhost:8001"
 	}
 
+	// Payments: M-Pesa (Daraja) payouts + Africa's Talking SMS. Uses live
+	// clients when PAYOUT_ADAPTER=live and credentials are present, otherwise
+	// deterministic mocks so the demo stays reproducible.
+	payCfg := payments.LoadConfig()
+	paySvc := payments.NewService(payCfg)
+	slog.Info("payments configured",
+		"adapter", payCfg.Adapter,
+		"payer", paySvc.Payer.Name(),
+		"notifier", paySvc.Notifier.Name(),
+		"live", paySvc.Live)
+	if payCfg.Adapter == "live" && payCfg.DarajaConfigured() {
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		if _, err := payments.NewDarajaClient(payCfg).AccessToken(ctx); err != nil {
+			slog.Warn("daraja connectivity check failed at startup", "error", err)
+		} else {
+			slog.Info("daraja connectivity check ok", "env", payCfg.DarajaEnv)
+		}
+		cancel()
+	}
+
 	mux := http.NewServeMux()
 
 	// Health check
@@ -60,7 +81,7 @@ func main() {
 	mux.HandleFunc("GET /api/v1/alerts/{alertId}", alertHandler.GetAlert)
 
 	// Trigger decision endpoint
-	triggerHandler := handler.NewTriggerHandler()
+	triggerHandler := handler.NewTriggerHandler(paySvc)
 	mux.HandleFunc("POST /api/v1/triggers", triggerHandler.CreateTrigger)
 	mux.HandleFunc("GET /api/v1/triggers/{triggerId}", triggerHandler.GetTrigger)
 

@@ -32,7 +32,7 @@ func TestHealthEndpoint(t *testing.T) {
 }
 
 func TestTriggerCreateAndIdempotency(t *testing.T) {
-	handler := NewTriggerHandler()
+	handler := NewTriggerHandler(nil)
 
 	body := `{
 		"trigger_id": "test-001",
@@ -84,7 +84,7 @@ func TestTriggerCreateAndIdempotency(t *testing.T) {
 }
 
 func TestTriggerRejectsSingleApprover(t *testing.T) {
-	handler := NewTriggerHandler()
+	handler := NewTriggerHandler(nil)
 
 	body := `{
 		"trigger_id": "test-002",
@@ -110,7 +110,7 @@ func TestTriggerRejectsSingleApprover(t *testing.T) {
 }
 
 func TestTriggerRejectsLowRiskScore(t *testing.T) {
-	handler := NewTriggerHandler()
+	handler := NewTriggerHandler(nil)
 
 	body := `{
 		"trigger_id": "test-003",

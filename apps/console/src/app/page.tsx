@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { WardList } from "@/components/WardList";
+import { BasinSummary } from "@/components/BasinSummary";
 import { DetailPanel } from "@/components/DetailPanel";
 import { SmePreparednessCard } from "@/components/SmePreparednessCard";
 import { TriggerPanel } from "@/components/TriggerPanel";
@@ -182,10 +183,13 @@ export default function Console() {
 
           <div className="sidebar__content">
             {activeTab === "wards" && !selectedWard && (
-              <WardList
-                wards={wards}
-                onSelectWard={setSelectedWard}
-              />
+              <>
+                <BasinSummary wards={wards} onSelectWard={setSelectedWard} />
+                <WardList
+                  wards={wards}
+                  onSelectWard={setSelectedWard}
+                />
+              </>
             )}
 
             {activeTab === "wards" && selectedWard && (
