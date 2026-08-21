@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import type { WardRisk } from "@/lib/types";
+import { WARD_POLYGONS, WARD_POLYGON_BY_ID } from "@/lib/ward-polygons";
 
 interface RiskMapProps {
   wards: WardRisk[];
@@ -13,12 +14,43 @@ interface RiskMapProps {
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
 
+// Risk-band colours mirror the CSS design tokens (--risk-*) so the map and the
+// panels read as one system.
 const BAND_COLORS: Record<string, string> = {
-  severe: "#ef4444",
-  high: "#f97316",
-  moderate: "#f59e0b",
-  low: "#10b981",
+  severe: "#cf5049",
+  high: "#df7a3a",
+  moderate: "#d6a13c",
+  low: "#45b083",
 };
+
+const WARDS_SOURCE = "resili-wards";
+const WARDS_FILL_LAYER = "resili-wards-fill";
+const WARDS_OUTLINE_LAYER = "resili-wards-outline";
+const WARDS_SELECTED_LAYER = "resili-wards-selected";
+
+function buildWardFeatureCollection(
+  wards: WardRisk[]
+): GeoJSON.FeatureCollection<GeoJSON.Polygon> {
+  const byId = new Map(wards.map((w) => [w.ward_id, w]));
+  const features: GeoJSON.Feature<GeoJSON.Polygon>[] = WARD_POLYGONS.map((wp) => {
+    const risk = byId.get(wp.ward_id);
+    return {
+      type: "Feature",
+      properties: {
+        ward_id: wp.ward_id,
+        name: wp.name,
+        band: risk?.band ?? "low",
+        score: risk?.score ?? 0,
+        color: BAND_COLORS[risk?.band ?? "low"] ?? BAND_COLORS.low,
+      },
+      geometry: {
+        type: "Polygon",
+        coordinates: [wp.polygon],
+      },
+    };
+  });
+  return { type: "FeatureCollection", features };
+}
 
 export default function RiskMap({
   wards,
@@ -27,125 +59,196 @@ export default function RiskMap({
 }: RiskMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const badgeMarkersRef = useRef<mapboxgl.Marker[]>([]);
+  const styleReadyRef = useRef(false);
+  const wardsRef = useRef<WardRisk[]>(wards);
+  const onSelectRef = useRef(onSelectWard);
+
+  // Keep the latest wards / callback available to map event handlers
+  // without re-registering them on every render.
+  useEffect(() => {
+    wardsRef.current = wards;
+  }, [wards]);
+  useEffect(() => {
+    onSelectRef.current = onSelectWard;
+  }, [onSelectWard]);
 
   useEffect(() => {
     if (!mapContainer.current) return;
-    if (!MAPBOX_TOKEN) return; // No token — render the setup hint instead.
+    if (!MAPBOX_TOKEN) return;
 
     mapboxgl.accessToken = MAPBOX_TOKEN;
 
     const map = new mapboxgl.Map({
       container: mapContainer.current,
       style: "mapbox://styles/mapbox/dark-v11",
-      center: [34.5, -0.1], // Centered around Lake Victoria Basin (Kisumu / Winam Gulf)
-      zoom: 8.8,
+      center: [34.5, -0.1],
+      zoom: 8.2,
       attributionControl: true,
     });
 
     map.addControl(new mapboxgl.NavigationControl({ showCompass: true }), "top-right");
-
     mapRef.current = map;
 
+    map.on("load", () => {
+      map.addSource(WARDS_SOURCE, {
+        type: "geojson",
+        data: buildWardFeatureCollection(wardsRef.current),
+      });
+
+      // Fill layer — the ward AREA. Uses the per-feature colour and
+      // scales opacity a touch with zoom so it reads as a region up close
+      // instead of a flat wash.
+      map.addLayer({
+        id: WARDS_FILL_LAYER,
+        type: "fill",
+        source: WARDS_SOURCE,
+        paint: {
+          "fill-color": ["get", "color"],
+          "fill-opacity": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            7, 0.22,
+            10, 0.42,
+            13, 0.55,
+          ],
+        },
+      });
+
+      // Crisp outline so the ward reads as a bounded area at every zoom.
+      map.addLayer({
+        id: WARDS_OUTLINE_LAYER,
+        type: "line",
+        source: WARDS_SOURCE,
+        paint: {
+          "line-color": ["get", "color"],
+          "line-width": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            7, 1.2,
+            11, 2.0,
+            14, 3.0,
+          ],
+          "line-opacity": 0.95,
+        },
+      });
+
+      // Selected-ward emphasis: thicker light halo.
+      map.addLayer({
+        id: WARDS_SELECTED_LAYER,
+        type: "line",
+        source: WARDS_SOURCE,
+        paint: {
+          "line-color": "#e9efec",
+          "line-width": 2.4,
+          "line-opacity": 0.9,
+        },
+        filter: ["==", ["get", "ward_id"], ""],
+      });
+
+      map.on("click", WARDS_FILL_LAYER, (e) => {
+        const f = e.features?.[0];
+        if (!f) return;
+        const wardId = (f.properties as { ward_id?: string })?.ward_id;
+        if (!wardId) return;
+        const ward = wardsRef.current.find((w) => w.ward_id === wardId);
+        if (ward) onSelectRef.current(ward);
+      });
+      map.on("mouseenter", WARDS_FILL_LAYER, () => {
+        map.getCanvas().style.cursor = "pointer";
+      });
+      map.on("mouseleave", WARDS_FILL_LAYER, () => {
+        map.getCanvas().style.cursor = "";
+      });
+
+      styleReadyRef.current = true;
+
+      // Fit to the union of ward polygons on first load.
+      const fc = buildWardFeatureCollection(wardsRef.current);
+      const bounds = new mapboxgl.LngLatBounds();
+      fc.features.forEach((f) =>
+        f.geometry.coordinates[0].forEach((c) =>
+          bounds.extend(c as [number, number])
+        )
+      );
+      if (!bounds.isEmpty()) {
+        map.fitBounds(bounds, { padding: 60, duration: 0, maxZoom: 9.2 });
+      }
+    });
+
     return () => {
+      styleReadyRef.current = false;
       map.remove();
     };
   }, []);
 
-  // Update markers and view when wards or selection changes
+  // Refresh polygon colours + score badges when ward data changes.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) return;
+    if (!map || !styleReadyRef.current) return;
 
-    // Clear existing markers
-    markersRef.current.forEach((m) => m.remove());
-    markersRef.current = [];
+    const source = map.getSource(WARDS_SOURCE) as
+      | mapboxgl.GeoJSONSource
+      | undefined;
+    if (source) {
+      source.setData(buildWardFeatureCollection(wards));
+    }
+
+    // Redraw score badges (label chips) at each ward centroid.
+    badgeMarkersRef.current.forEach((m) => m.remove());
+    badgeMarkersRef.current = [];
 
     wards.forEach((ward) => {
+      if (!WARD_POLYGON_BY_ID[ward.ward_id]) return;
       if (!ward.latitude || !ward.longitude) return;
 
+      const color = BAND_COLORS[ward.band] ?? BAND_COLORS.low;
       const isSelected = selectedWard?.ward_id === ward.ward_id;
-      const color = BAND_COLORS[ward.band] || "#3b82f6";
 
-      // Create custom HTML marker element
       const el = document.createElement("div");
-      el.className = `custom-map-marker ${isSelected ? "selected" : ""}`;
-      el.style.cssText = `
-        position: relative;
-        cursor: pointer;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        transition: transform 0.2s ease;
-      `;
-
+      el.className = "ward-marker";
       el.innerHTML = `
-        <div style="
-          position: absolute;
-          width: ${isSelected ? "46px" : "36px"};
-          height: ${isSelected ? "46px" : "36px"};
-          border-radius: 50%;
+        <div class="ward-marker__dot" style="
+          width: ${isSelected ? 34 : 28}px;
+          height: ${isSelected ? 34 : 28}px;
           background: ${color};
-          opacity: 0.25;
-          animation: pulse 2s infinite ease-in-out;
-        "></div>
-        <div style="
-          width: ${isSelected ? "34px" : "26px"};
-          height: ${isSelected ? "34px" : "26px"};
-          border-radius: 50%;
-          background: ${color};
-          border: 2px solid #ffffff;
-          box-shadow: 0 0 12px ${color};
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #ffffff;
-          font-weight: 700;
-          font-size: ${isSelected ? "12px" : "10px"};
-          font-family: 'JetBrains Mono', monospace;
-          z-index: 2;
-        ">
-          ${Math.round(ward.score)}
-        </div>
-        <div style="
-          margin-top: 4px;
-          padding: 2px 6px;
-          background: rgba(10, 14, 23, 0.85);
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          border-radius: 4px;
-          color: #f1f5f9;
-          font-size: 10px;
-          font-weight: 600;
-          white-space: nowrap;
-          backdrop-filter: blur(4px);
-        ">
-          ${ward.ward_id.replace("KE-039-", "")}
-        </div>
+          border: 2px solid ${isSelected ? "#e9efec" : "rgba(233,239,236,0.65)"};
+          font-size: ${isSelected ? "12px" : "11px"};
+        ">${Math.round(ward.score)}</div>
+        <div class="ward-marker__label">${ward.ward_id.replace("KE-039-", "")}</div>
       `;
-
-      el.addEventListener("click", () => {
-        onSelectWard(ward);
-        map.flyTo({
-          center: [ward.longitude, ward.latitude],
-          zoom: 10.5,
-          essential: true,
-          speed: 1.2,
-        });
+      el.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        onSelectRef.current(ward);
       });
 
-      const marker = new mapboxgl.Marker({ element: el })
+      const marker = new mapboxgl.Marker({ element: el, anchor: "center" })
         .setLngLat([ward.longitude, ward.latitude])
         .addTo(map);
-
-      markersRef.current.push(marker);
+      badgeMarkersRef.current.push(marker);
     });
-  }, [wards, selectedWard, onSelectWard]);
+  }, [wards, selectedWard]);
 
-  // Fly to selected ward when selected outside of map click
+  // Update the selected-ward outline filter and fly to it.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !selectedWard) return;
-    if (selectedWard.latitude && selectedWard.longitude) {
+    if (!map || !styleReadyRef.current) return;
+
+    map.setFilter(WARDS_SELECTED_LAYER, [
+      "==",
+      ["get", "ward_id"],
+      selectedWard?.ward_id ?? "",
+    ]);
+
+    if (!selectedWard) return;
+    const wp = WARD_POLYGON_BY_ID[selectedWard.ward_id];
+    if (wp) {
+      const bounds = new mapboxgl.LngLatBounds();
+      wp.polygon.forEach((c) => bounds.extend(c as [number, number]));
+      map.fitBounds(bounds, { padding: 120, maxZoom: 11, duration: 900 });
+    } else if (selectedWard.latitude && selectedWard.longitude) {
       map.flyTo({
         center: [selectedWard.longitude, selectedWard.latitude],
         zoom: 10.5,
@@ -164,8 +267,8 @@ export default function RiskMap({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#0a0e17",
-          color: "#f1f5f9",
+          background: "var(--bg-inset)",
+          color: "var(--text-primary)",
           padding: "24px",
           textAlign: "center",
         }}
@@ -174,7 +277,7 @@ export default function RiskMap({
           <div style={{ fontSize: "15px", fontWeight: 700, marginBottom: "8px" }}>
             Map basemap not configured
           </div>
-          <div style={{ fontSize: "13px", color: "#94a3b8", lineHeight: 1.5 }}>
+          <div style={{ fontSize: "13px", color: "var(--text-secondary)", lineHeight: 1.5 }}>
             Set <code>NEXT_PUBLIC_MAPBOX_TOKEN</code> in{" "}
             <code>apps/console/.env.local</code> (copy from{" "}
             <code>.env.example</code>) and restart the dev server to render the
@@ -189,46 +292,28 @@ export default function RiskMap({
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       <div ref={mapContainer} style={{ width: "100%", height: "100%" }} />
 
-      {/* Map Legend Overlay */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: "24px",
-          left: "24px",
-          background: "rgba(26, 34, 54, 0.9)",
-          backdropFilter: "blur(12px)",
-          border: "1px solid rgba(148, 163, 184, 0.15)",
-          borderRadius: "10px",
-          padding: "12px 16px",
-          color: "#f1f5f9",
-          fontSize: "11px",
-          zIndex: 10,
-          boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
-        }}
-      >
-        <div style={{ fontWeight: 700, marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.5px", color: "#94a3b8" }}>
-          Flood Risk Likelihood Band
+      {/* Risk-scale legend */}
+      <div className="map-legend">
+        <div className="map-legend__title">Flood-risk likelihood band</div>
+        <div className="map-legend__row">
+          <span className="map-legend__swatch" style={{ background: "var(--risk-severe)" }} />
+          <span>Severe · 75–100 (trigger threshold)</span>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#ef4444" }}></span>
-            <span>Severe Risk (75 - 100) — Trigger Threshold</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#f97316" }}></span>
-            <span>High Risk (50 - 74.9)</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#f59e0b" }}></span>
-            <span>Moderate Risk (25 - 49.9)</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#10b981" }}></span>
-            <span>Low Risk (0 - 24.9)</span>
-          </div>
+        <div className="map-legend__row">
+          <span className="map-legend__swatch" style={{ background: "var(--risk-high)" }} />
+          <span>High · 50–74.9</span>
         </div>
-        <div style={{ marginTop: "8px", paddingTop: "8px", borderTop: "1px solid rgba(255,255,255,0.1)", fontSize: "10px", color: "#64748b" }}>
-          Centroids generalised to ward level per KMD/NDMA guidelines
+        <div className="map-legend__row">
+          <span className="map-legend__swatch" style={{ background: "var(--risk-moderate)" }} />
+          <span>Moderate · 25–49.9</span>
+        </div>
+        <div className="map-legend__row" style={{ marginBottom: 0 }}>
+          <span className="map-legend__swatch" style={{ background: "var(--risk-low)" }} />
+          <span>Low · 0–24.9</span>
+        </div>
+        <div className="map-legend__note">
+          Likelihood, not certainty. Ward polygons are illustrative
+          generalisations, not survey-grade boundaries.
         </div>
       </div>
     </div>
