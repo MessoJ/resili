@@ -26,10 +26,14 @@ export function AuditLedger({ ledger }: AuditLedgerProps) {
         </div>
       </div>
 
-      {/* Verification Badge */}
-      <div className="chain-valid">
-        <span>✓</span>
-        <span>Cryptographic Hash-Chain Intact &amp; Verified ({ledger.events.length} Blocks)</span>
+      {/* Verification banner — reflects the gateway's actual chain_valid flag */}
+      <div className={`chain-status ${ledger.chain_valid ? "chain-status--valid" : "chain-status--invalid"}`}>
+        <span>{ledger.chain_valid ? "✓" : "✕"}</span>
+        <span>
+          {ledger.chain_valid
+            ? `Hash chain intact & verified (${ledger.events.length} blocks)`
+            : `Chain verification FAILED (${ledger.events.length} blocks) — do not action`}
+        </span>
       </div>
 
       {/* Filter Tabs */}
@@ -56,7 +60,7 @@ export function AuditLedger({ ledger }: AuditLedgerProps) {
 
       {/* Event list */}
       <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-        {filteredEvents.map((evt, idx) => (
+        {filteredEvents.map((evt) => (
           <div
             key={evt.id}
             style={{
@@ -82,7 +86,7 @@ export function AuditLedger({ ledger }: AuditLedgerProps) {
             </div>
 
             <div style={{ fontSize: "10px", color: "var(--text-secondary)", wordBreak: "break-all" }}>
-              <div><strong>Block Hash:</strong> <span style={{ color: "#38bdf8" }}>{evt.hash}</span></div>
+              <div><strong>Block Hash:</strong> <span style={{ color: "var(--accent-primary)" }}>{evt.hash}</span></div>
               {evt.previous_hash && (
                 <div style={{ marginTop: "2px", color: "var(--text-muted)" }}>
                   <strong>Prev Hash:</strong> {evt.previous_hash.slice(0, 24)}...
@@ -99,17 +103,20 @@ export function AuditLedger({ ledger }: AuditLedgerProps) {
       <div
         style={{
           marginTop: "16px",
-          padding: "10px",
-          background: "rgba(10, 14, 23, 0.4)",
+          padding: "10px 12px",
+          background: "var(--bg-inset)",
           borderRadius: "var(--radius-sm)",
           fontSize: "10px",
           color: "var(--text-muted)",
-          fontFamily: "Inter, sans-serif",
-          lineHeight: 1.4,
+          fontFamily: "var(--font-sans)",
+          lineHeight: 1.5,
           border: "1px solid var(--border-subtle)",
         }}
       >
-        <strong>Zero Gas Fees &bull; Zero Cloud Lock-In:</strong> Every state change is verified deterministically against prior parent hashes, satisfying Digital Public Good and transparent climate governance requirements.
+        Each block hashes its payload together with the previous block&apos;s
+        hash, so any retro-active edit breaks the chain and is detectable. No
+        external chain or gas fees — verification is deterministic and
+        self-hosted, per the Digital Public Good transparency requirements.
       </div>
     </div>
   );

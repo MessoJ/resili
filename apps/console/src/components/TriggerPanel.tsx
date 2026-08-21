@@ -2,82 +2,94 @@
 
 import React, { useState } from "react";
 import type { WardRisk } from "@/lib/types";
+import { API_BASE_URL } from "@/lib/api";
 
 interface TriggerPanelProps {
   selectedWard: WardRisk | null;
 }
 
+/** Decision returned by the gateway trigger endpoint, in view-model form. */
+interface TriggerDecision {
+  eligible: boolean;
+  reason: string;
+  decisionHash: string;
+  idempotencyKey: string;
+  amountKes: number;
+  payoutRef: string | null;
+}
+
+// Actionable forecast lead time (days) used for the trigger rule (>= 3).
+const LEAD_DAYS = 4;
+// Anticipatory cash transfer per household (policy constant).
+const PAYOUT_KES = 500;
+
 export function TriggerPanel({ selectedWard }: TriggerPanelProps) {
   const [officer1Approved, setOfficer1Approved] = useState(false);
   const [officer2Approved, setOfficer2Approved] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [payoutResult, setPayoutResult] = useState<{
-    status: string;
-    payoutId: string;
-    idempotencyKey: string;
-    amountKes: number;
-    decisionHash: string;
-  } | null>(null);
+  const [decision, setDecision] = useState<TriggerDecision | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const ward = selectedWard;
   const isSevere = ward ? ward.score >= 75 : false;
-  const leadDays = 4; // Actionable lead time
+  const leadDays = LEAD_DAYS;
   const bothApproved = officer1Approved && officer2Approved;
-  const canTrigger = isSevere && bothApproved && !payoutResult;
+  const canTrigger = isSevere && bothApproved && !decision;
 
   const handleExecuteTrigger = async () => {
     if (!ward) return;
     setIsSubmitting(true);
+    setError(null);
+
+    const wardSlug = ward.ward_id.replace("KE-039-", "").toLowerCase();
+    const idempotencyKey = `payout-${wardSlug}-${Date.now()}`;
+    const payload = {
+      trigger_id: `trig-${ward.ward_id.toLowerCase()}-001`,
+      ward_id: ward.ward_id,
+      risk_score: ward.score,
+      lead_days: leadDays,
+      idempotency_key: idempotencyKey,
+      approvals: [
+        { approver_id: "county-officer-kisumu", approved_at: new Date().toISOString() },
+        { approver_id: "ndma-observer-001", approved_at: new Date().toISOString() },
+      ],
+    };
 
     try {
-      const idempotencyKey = `payout-nyando-${Date.now()}`;
-      const payload = {
-        trigger_id: `trig-${ward.ward_id.toLowerCase()}-001`,
-        ward_id: ward.ward_id,
-        risk_score: ward.score,
-        lead_days: leadDays,
-        idempotency_key: idempotencyKey,
-        approvals: [
-          { approver_id: "county-officer-kisumu", approved_at: new Date().toISOString() },
-          { approver_id: "ndma-observer-001", approved_at: new Date().toISOString() },
-        ],
-      };
-
-      // Call API gateway if available
-      const res = await fetch("http://localhost:8080/api/v1/triggers", {
+      const res = await fetch(`${API_BASE_URL}/api/v1/triggers`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        setPayoutResult({
-          status: "SUCCESS_DISPATCHED",
-          payoutId: `MPESA-B2C-${Math.floor(Math.random() * 899999 + 100000)}`,
-          idempotencyKey: data.idempotency_key || idempotencyKey,
-          amountKes: 500,
-          decisionHash: data.decision_hash || "3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f",
-        });
-      } else {
-        // Fallback demo execution
-        setPayoutResult({
-          status: "SUCCESS_DISPATCHED",
-          payoutId: `MPESA-B2C-${Math.floor(Math.random() * 899999 + 100000)}`,
-          idempotencyKey,
-          amountKes: 500,
-          decisionHash: "3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f",
-        });
+      if (!res.ok) {
+        setError(`The gateway rejected the trigger request (HTTP ${res.status}).`);
+        return;
       }
-    } catch {
-      // Deterministic demo execution fallback
-      setPayoutResult({
-        status: "SUCCESS_DISPATCHED",
-        payoutId: `MPESA-B2C-849201`,
-        idempotencyKey: `payout-nyando-demo-001`,
-        amountKes: 500,
-        decisionHash: "3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f",
+
+      const data = await res.json();
+      const decisionHash: string = data.decision_hash || "";
+
+      // The payout reference is derived from the real audit decision hash — no
+      // random or placeholder values — so it is reproducible and verifiable
+      // against the ledger. Payout is only ever shown when the backend itself
+      // returned an eligible decision.
+      setDecision({
+        eligible: Boolean(data.eligible),
+        reason: data.reason || "",
+        decisionHash,
+        idempotencyKey: data.idempotency_key || idempotencyKey,
+        amountKes: PAYOUT_KES,
+        payoutRef: data.eligible && decisionHash
+          ? `MPESA-B2C-${decisionHash.slice(0, 10).toUpperCase()}`
+          : null,
       });
+    } catch {
+      setError(
+        "Could not reach the API gateway. Start the gateway (" +
+          API_BASE_URL +
+          ") to authorise a live anticipatory payout."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -86,7 +98,8 @@ export function TriggerPanel({ selectedWard }: TriggerPanelProps) {
   const handleReset = () => {
     setOfficer1Approved(false);
     setOfficer2Approved(false);
-    setPayoutResult(null);
+    setDecision(null);
+    setError(null);
   };
 
   return (
@@ -175,7 +188,7 @@ export function TriggerPanel({ selectedWard }: TriggerPanelProps) {
                   <input
                     type="checkbox"
                     checked={officer1Approved}
-                    disabled={!isSevere || payoutResult !== null}
+                    disabled={!isSevere || decision !== null}
                     onChange={(e) => setOfficer1Approved(e.target.checked)}
                     style={{ accentColor: "var(--accent-primary)" }}
                   />
@@ -195,7 +208,7 @@ export function TriggerPanel({ selectedWard }: TriggerPanelProps) {
                   <input
                     type="checkbox"
                     checked={officer2Approved}
-                    disabled={!isSevere || payoutResult !== null}
+                    disabled={!isSevere || decision !== null}
                     onChange={(e) => setOfficer2Approved(e.target.checked)}
                     style={{ accentColor: "var(--accent-primary)" }}
                   />
@@ -207,59 +220,77 @@ export function TriggerPanel({ selectedWard }: TriggerPanelProps) {
 
           {/* Step 3: Trigger Execution Button */}
           <div className="trigger-step">
-            <div className={`trigger-step__icon ${payoutResult ? "trigger-step__icon--complete" : "trigger-step__icon--pending"}`}>
-              {payoutResult ? "✓" : "3"}
+            <div className={`trigger-step__icon ${decision?.eligible ? "trigger-step__icon--complete" : "trigger-step__icon--pending"}`}>
+              {decision?.eligible ? "✓" : "3"}
             </div>
             <div className="trigger-step__content">
               <div className="trigger-step__title">3. Execute Anticipatory Cash Transfer</div>
               <div className="trigger-step__detail" style={{ marginBottom: "12px" }}>
-                Dispatches KES 500/household pre-disaster liquidity via M-Pesa adapter.
+                Dispatches KES {PAYOUT_KES}/household pre-disaster liquidity via the
+                M-Pesa adapter, gated on the gateway&apos;s dual-approval decision.
               </div>
 
-              {!payoutResult && (
+              {!decision && (
                 <button
                   disabled={!canTrigger || isSubmitting}
                   onClick={handleExecuteTrigger}
                   style={{
                     width: "100%",
-                    padding: "10px 16px",
+                    padding: "11px 16px",
                     borderRadius: "var(--radius-sm)",
-                    background: canTrigger ? "var(--accent-danger)" : "var(--bg-primary)",
-                    color: canTrigger ? "#ffffff" : "var(--text-muted)",
-                    border: "1px solid var(--border-subtle)",
+                    background: canTrigger ? "var(--accent-danger)" : "var(--bg-inset)",
+                    color: canTrigger ? "#0b110f" : "var(--text-muted)",
+                    border: canTrigger ? "1px solid var(--accent-danger)" : "1px solid var(--border-subtle)",
                     fontWeight: 700,
                     fontSize: "13px",
+                    letterSpacing: "0.01em",
                     cursor: canTrigger ? "pointer" : "not-allowed",
-                    transition: "all var(--transition-fast)",
-                    boxShadow: canTrigger ? "0 0 16px rgba(239, 68, 68, 0.4)" : "none",
+                    transition: "background var(--transition-fast)",
                   }}
                 >
-                  {isSubmitting ? "Executing Payout &amp; Recording Chain..." : "Authorize Anticipatory Payout"}
+                  {isSubmitting ? "Submitting to audit chain…" : "Authorise anticipatory payout"}
                 </button>
               )}
             </div>
           </div>
 
-          {/* Payout Receipt Card */}
-          {payoutResult && (
+          {/* Gateway unreachable / rejected request */}
+          {error && (
             <div
               style={{
-                marginTop: "12px",
+                padding: "12px 14px",
+                background: "var(--risk-severe-bg)",
+                border: "1px solid rgba(207, 80, 73, 0.3)",
+                borderRadius: "var(--radius-md)",
+                fontSize: "12px",
+                color: "var(--risk-severe)",
+                lineHeight: 1.5,
+              }}
+            >
+              {error}
+            </div>
+          )}
+
+          {/* Eligible decision — anticipatory payout authorised */}
+          {decision?.eligible && (
+            <div
+              style={{
+                marginTop: "4px",
                 padding: "16px",
-                background: "rgba(16, 185, 129, 0.12)",
-                border: "1px solid var(--accent-success)",
+                background: "var(--risk-low-bg)",
+                border: "1px solid rgba(69, 176, 131, 0.35)",
                 borderRadius: "var(--radius-md)",
                 fontSize: "12px",
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--accent-success)", fontWeight: 700, marginBottom: "8px" }}>
-                <span>✓</span> Payout Successfully Dispatched &amp; Recorded
+              <div style={{ display: "flex", alignItems: "center", gap: "7px", color: "var(--accent-success)", fontWeight: 700, marginBottom: "10px" }}>
+                <span>✓</span> Anticipatory payout authorised &amp; recorded
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "4px", color: "var(--text-secondary)", fontFamily: "JetBrains Mono, monospace", fontSize: "11px" }}>
-                <div>ID: {payoutResult.payoutId}</div>
-                <div>Amount: KES {payoutResult.amountKes} (Household Transfer)</div>
-                <div>Idempotency: {payoutResult.idempotencyKey}</div>
-                <div>Audit Hash: {payoutResult.decisionHash.slice(0, 16)}...</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "5px", color: "var(--text-secondary)", fontFamily: "var(--font-mono)", fontSize: "11px" }}>
+                <div>REF&nbsp;&nbsp;&nbsp;&nbsp;{decision.payoutRef}</div>
+                <div>AMOUNT&nbsp;&nbsp;KES {decision.amountKes} · per household</div>
+                <div>IDEMP&nbsp;&nbsp;&nbsp;{decision.idempotencyKey}</div>
+                <div style={{ wordBreak: "break-all" }}>AUDIT&nbsp;&nbsp;&nbsp;{decision.decisionHash.slice(0, 24)}…</div>
               </div>
               <button
                 onClick={handleReset}
@@ -274,7 +305,46 @@ export function TriggerPanel({ selectedWard }: TriggerPanelProps) {
                   cursor: "pointer",
                 }}
               >
-                Reset Demo Workflow
+                Reset workflow
+              </button>
+            </div>
+          )}
+
+          {/* Decision returned but not eligible — show the gateway's reason */}
+          {decision && !decision.eligible && (
+            <div
+              style={{
+                marginTop: "4px",
+                padding: "16px",
+                background: "var(--risk-moderate-bg)",
+                border: "1px solid rgba(214, 161, 60, 0.35)",
+                borderRadius: "var(--radius-md)",
+                fontSize: "12px",
+              }}
+            >
+              <div style={{ color: "var(--risk-moderate)", fontWeight: 700, marginBottom: "6px" }}>
+                Trigger not authorised
+              </div>
+              <div style={{ color: "var(--text-secondary)", lineHeight: 1.5 }}>
+                {decision.reason || "The gateway declined this trigger against the public rules."}
+              </div>
+              <div style={{ marginTop: "8px", color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "11px", wordBreak: "break-all" }}>
+                AUDIT&nbsp;&nbsp;&nbsp;{decision.decisionHash.slice(0, 24)}…
+              </div>
+              <button
+                onClick={handleReset}
+                style={{
+                  marginTop: "12px",
+                  padding: "6px 12px",
+                  background: "var(--bg-card)",
+                  border: "1px solid var(--border-subtle)",
+                  borderRadius: "var(--radius-sm)",
+                  color: "var(--text-primary)",
+                  fontSize: "11px",
+                  cursor: "pointer",
+                }}
+              >
+                Reset workflow
               </button>
             </div>
           )}

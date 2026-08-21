@@ -7,6 +7,20 @@ interface AlertTimelineProps {
   alerts: AlertData[];
 }
 
+// Maps a CAP severity string to the console's risk-band chrome.
+function severityBand(severity: string): "severe" | "high" | "moderate" {
+  const s = severity.toLowerCase();
+  if (s === "extreme" || s === "severe") return "severe";
+  if (s === "moderate") return "high";
+  return "moderate";
+}
+
+const BAND_COLOR: Record<string, string> = {
+  severe: "var(--risk-severe)",
+  high: "var(--risk-high)",
+  moderate: "var(--risk-moderate)",
+};
+
 export function AlertTimeline({ alerts }: AlertTimelineProps) {
   const [showXml, setShowXml] = useState<string | null>(null);
 
@@ -60,13 +74,14 @@ export function AlertTimeline({ alerts }: AlertTimelineProps) {
 
       <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
         {alerts.map((alert) => {
-          const isSevere = alert.severity.toLowerCase() === "severe";
+          const band = severityBand(alert.severity);
+          const bandColor = BAND_COLOR[band];
           const isXmlOpen = showXml === alert.identifier;
 
           return (
             <div
               key={alert.identifier}
-              className={`alert-item ${isSevere ? "alert-item--severe" : "alert-item--moderate"}`}
+              className={`alert-item alert-item--${band}`}
             >
               <div className="alert-item__time">
                 {new Date(alert.sent).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
@@ -79,8 +94,9 @@ export function AlertTimeline({ alerts }: AlertTimelineProps) {
                     style={{
                       fontSize: "10px",
                       textTransform: "uppercase",
+                      letterSpacing: "0.06em",
                       fontWeight: 700,
-                      color: isSevere ? "var(--risk-severe)" : "var(--risk-moderate)",
+                      color: bandColor,
                     }}
                   >
                     {alert.severity}
@@ -95,7 +111,7 @@ export function AlertTimeline({ alerts }: AlertTimelineProps) {
                   style={{
                     marginTop: "8px",
                     padding: "6px 8px",
-                    background: "rgba(10, 14, 23, 0.6)",
+                    background: "var(--bg-inset)",
                     borderRadius: "var(--radius-sm)",
                     fontSize: "11px",
                     color: "var(--text-muted)",
@@ -120,8 +136,8 @@ export function AlertTimeline({ alerts }: AlertTimelineProps) {
                     style={{
                       background: "transparent",
                       border: "1px solid var(--border-subtle)",
-                      borderRadius: "4px",
-                      padding: "2px 6px",
+                      borderRadius: "var(--radius-sm)",
+                      padding: "2px 7px",
                       color: "var(--accent-primary)",
                       cursor: "pointer",
                       fontSize: "10px",
@@ -135,12 +151,12 @@ export function AlertTimeline({ alerts }: AlertTimelineProps) {
                   <pre
                     style={{
                       marginTop: "8px",
-                      padding: "8px",
-                      background: "#050811",
-                      borderRadius: "4px",
-                      fontFamily: "JetBrains Mono, monospace",
+                      padding: "10px",
+                      background: "var(--bg-inset)",
+                      borderRadius: "var(--radius-sm)",
+                      fontFamily: "var(--font-mono)",
                       fontSize: "10px",
-                      color: "#38bdf8",
+                      color: "var(--accent-primary)",
                       overflowX: "auto",
                       whiteSpace: "pre-wrap",
                       border: "1px solid var(--border-subtle)",
