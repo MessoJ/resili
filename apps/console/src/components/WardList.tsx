@@ -9,10 +9,10 @@ interface WardListProps {
 }
 
 const BAND_COLORS: Record<string, string> = {
-  severe: "#ef4444",
-  high: "#f97316",
-  moderate: "#f59e0b",
-  low: "#10b981",
+  severe: "#cf5049",
+  high: "#df7a3a",
+  moderate: "#d6a13c",
+  low: "#45b083",
 };
 
 export function WardList({ wards, onSelectWard }: WardListProps) {
@@ -52,7 +52,7 @@ export function WardList({ wards, onSelectWard }: WardListProps) {
       {/* Ward Cards */}
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         {filteredWards.map((ward) => {
-          const color = BAND_COLORS[ward.band] || "#3b82f6";
+          const color = BAND_COLORS[ward.band] || "#6aa5b5";
           const cleanName = ward.ward_id.replace("KE-039-", "");
 
           return (
@@ -60,6 +60,7 @@ export function WardList({ wards, onSelectWard }: WardListProps) {
               key={ward.ward_id}
               className="ward-card"
               onClick={() => onSelectWard(ward)}
+              style={{ "--spine": color } as React.CSSProperties}
             >
               <div className="ward-card__header">
                 <div>

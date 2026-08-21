@@ -9,10 +9,10 @@ interface DetailPanelProps {
 }
 
 const BAND_COLORS: Record<string, string> = {
-  severe: "#ef4444",
-  high: "#f97316",
-  moderate: "#f59e0b",
-  low: "#10b981",
+  severe: "#cf5049",
+  high: "#df7a3a",
+  moderate: "#d6a13c",
+  low: "#45b083",
 };
 
 const FEATURE_LABELS: Record<string, string> = {
@@ -30,7 +30,7 @@ const FEATURE_LABELS: Record<string, string> = {
 };
 
 export function DetailPanel({ ward, onBack }: DetailPanelProps) {
-  const color = BAND_COLORS[ward.band] || "#3b82f6";
+  const color = BAND_COLORS[ward.band] || "#6aa5b5";
   const cleanName = ward.ward_id.replace("KE-039-", "");
 
   const sortedFeatures = Object.entries(ward.feature_contributions).sort(

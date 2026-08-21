@@ -4,12 +4,16 @@ import React, { useState } from "react";
 import type { WardRisk } from "@/lib/types";
 
 /**
- * Teammate 2 (Frontend Dev) Skeleton Component: SME Climate Preparedness Card
+ * SME Climate Preparedness Card.
  *
- * PURPOSE:
- * Displays actionable preparedness recommendations for local businesses
- * (e.g. shops in Ahero town, agro-dealers, smallholder fish traders)
- * based on the ward's current flood risk score.
+ * Displays actionable, tickable preparedness recommendations for local
+ * businesses (e.g. shops in Ahero town, agro-dealers, smallholder fish
+ * traders) based on the ward's current flood risk score, plus a copy-ready
+ * community SMS broadcast template.
+ *
+ * Advisories are decision-support only: the copy always points recipients to
+ * official KMD/NDMA directives and never impersonates an official warning
+ * (climate-safety guardrail).
  */
 
 interface SmePreparednessCardProps {
@@ -17,9 +21,22 @@ interface SmePreparednessCardProps {
 }
 
 export function SmePreparednessCard({ ward }: SmePreparednessCardProps) {
-  // TODO (Teammate 2): Add a state variable to track completed checklist items
-  // Example: const [checkedItems, setCheckedItems] = useState<number[]>([]);
+  // Tracks which checklist items the operator has ticked off. Keyed by the
+  // item's index so a user can work through the list during an activation.
+  const [checkedItems, setCheckedItems] = useState<Set<number>>(new Set());
   const [copied, setCopied] = useState(false);
+
+  const toggleItem = (idx: number) => {
+    setCheckedItems((prev) => {
+      const next = new Set(prev);
+      if (next.has(idx)) {
+        next.delete(idx);
+      } else {
+        next.add(idx);
+      }
+      return next;
+    });
+  };
 
   if (!ward) {
     return (
@@ -47,13 +64,15 @@ export function SmePreparednessCard({ ward }: SmePreparednessCardProps) {
 
   const smsSummary = `[resili SME ADVISORY - ${ward.ward_id.replace("KE-039-", "")}] Risk Score: ${ward.score.toFixed(1)} (${ward.band.toUpperCase()}). Action: ${checklist[0]}. Follow official KMD/NDMA directives.`;
 
-  const handleCopySms = () => {
-    // TODO (Teammate 2): Implement navigator.clipboard.writeText(smsSummary)
-    // and setCopied(true) for 2 seconds
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(smsSummary);
+  const handleCopySms = async () => {
+    try {
+      await navigator.clipboard.writeText(smsSummary);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard API unavailable (e.g. insecure context) — leave the template
+      // visible so the operator can copy it manually.
+      setCopied(false);
     }
   };
 
@@ -76,26 +95,31 @@ export function SmePreparednessCard({ ward }: SmePreparednessCardProps) {
 
       {/* Checklist items */}
       <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "16px" }}>
-        {checklist.map((item, idx) => (
-          <label
-            key={idx}
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "8px",
-              fontSize: "12px",
-              color: "var(--text-secondary)",
-              cursor: "pointer",
-            }}
-          >
-            {/* TODO (Teammate 2): Wire up checkbox toggle with checkedItems state */}
-            <input
-              type="checkbox"
-              style={{ marginTop: "3px", accentColor: "var(--accent-primary)" }}
-            />
-            <span>{item}</span>
-          </label>
-        ))}
+        {checklist.map((item, idx) => {
+          const checked = checkedItems.has(idx);
+          return (
+            <label
+              key={idx}
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "8px",
+                fontSize: "12px",
+                color: checked ? "var(--text-muted)" : "var(--text-secondary)",
+                cursor: "pointer",
+                textDecoration: checked ? "line-through" : "none",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={() => toggleItem(idx)}
+                style={{ marginTop: "3px", accentColor: "var(--accent-primary)" }}
+              />
+              <span>{item}</span>
+            </label>
+          );
+        })}
       </div>
 
       {/* SMS Dissemination preview */}
@@ -110,7 +134,7 @@ export function SmePreparednessCard({ ward }: SmePreparednessCardProps) {
         <div style={{ fontSize: "10px", color: "var(--text-muted)", marginBottom: "4px", textTransform: "uppercase" }}>
           Community Broadcast SMS Template
         </div>
-        <div style={{ fontSize: "11px", fontFamily: "JetBrains Mono, monospace", color: "#38bdf8", marginBottom: "8px" }}>
+        <div style={{ fontSize: "11px", fontFamily: "var(--font-mono)", color: "var(--accent-primary)", marginBottom: "8px", lineHeight: 1.5 }}>
           {smsSummary}
         </div>
         <button
