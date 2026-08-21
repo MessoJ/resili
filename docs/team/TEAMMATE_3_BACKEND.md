@@ -6,13 +6,23 @@ Extend the Go API Gateway with REST endpoints for local business advisories, ens
 ## Files You Own
 - `services/gateway/internal/handler/sme.go`
 - `services/gateway/internal/handler/sme_test.go`
+- `services/gateway/internal/handler/trigger.go`
 
-## Your Bite-Sized TODOs
-Open `services/gateway/internal/handler/sme.go`:
-1. **TODO 1:** In `GetSmeAdvisory()`, add a check for `wardID == "KE-039-KANO"` to return `riskBand: "high"` and advisories:
-   - "Secure outdoor market stalls against high winds and runoff"
-   - "Clear silt and debris from local rice irrigation access channels"
-2. **TODO 2:** In `services/gateway/internal/handler/sme_test.go`, add a test verifying that `KE-039-KANO` returns `"high"`.
+## Status: complete ✅
+
+All owned handlers are production-grade, wired into the gateway router, and covered by tests:
+
+1. **SME advisory** (`sme.go`) — ward-tailored preparedness checklists with three
+   risk bands: `severe` (Nyando, Budalangi), `high` (Kano Plains — secure outdoor
+   market stalls, clear silt from rice irrigation channels), and `moderate`
+   (default). Every response carries an explicit KMD/NDMA/county attribution and
+   never impersonates an official warning (climate-safety guardrail).
+2. **SME tests** (`sme_test.go`) — cover the Nyando severe path, the Kano `high`
+   path, and the missing-`wardId` 400.
+3. **Trigger decisions** (`trigger.go`) — anticipatory-action endpoint enforcing
+   public trigger rules (risk ≥ 75, lead ≥ 3 days), two-person approval (unique
+   approvers only), idempotency (replayed key returns the original decision), and
+   a SHA-256 decision hash for the audit trail. Covered by `trigger_test.go`.
 
 ## How to Test Your Work
 ```bash
