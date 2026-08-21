@@ -1,0 +1,10 @@
+# Heroku container-stack manifest for the resili API gateway.
+#
+# Used when this service is deployed as its own Heroku app on the `container`
+# stack (heroku stack:set container). The CI pipeline
+# (.github/workflows/deploy-heroku.yml) instead pushes the image straight to the
+# Heroku Container Registry, but this manifest keeps `git push heroku` working
+# for manual/emergency deploys.
+build:
+  docker:
+    web: Dockerfile

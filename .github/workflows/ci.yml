@@ -1,0 +1,90 @@
+name: CI
+
+# Build and test every service on push and pull request. Keeps `main`
+# demoable: nothing merges unless the Go gateway, the Python ML service, and
+# the Next.js console all build and their tests pass.
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gateway:
+    name: Go gateway
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/gateway
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache-dependency-path: services/gateway/go.sum
+      - run: go build ./...
+      - run: go vet ./...
+      - run: go test ./...
+
+  forecast-ingest:
+    name: Python ML service
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/forecast-ingest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install --upgrade pip && pip install .[dev] || pip install .
+      - run: pip install ruff pytest
+      - run: ruff check src tests
+      - name: Train model (fast, deterministic) and run tests
+        run: |
+          python -m src.model.train
+          pytest -q
+
+  console:
+    name: Next.js console
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/console
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/console/package-lock.json
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm run lint
+      - name: Production build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
+          NEXT_TELEMETRY_DISABLED: "1"
+
+  ussd-core:
+    name: USSD core package
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/ussd-core
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install pnpm
+        run: npm install -g pnpm@10.11.0
+      - run: pnpm install --frozen-lockfile || pnpm install
+        working-directory: .
+      - run: npx vitest run

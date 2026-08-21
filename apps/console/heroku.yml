@@ -1,0 +1,10 @@
+# Heroku container-stack manifest for the resili Console (Next.js PWA).
+#
+# NEXT_PUBLIC_* values are inlined at build time. When deploying via
+# `git push heroku` set them as build ARGs below; the CI pipeline
+# (.github/workflows/deploy-heroku.yml) passes them with --build-arg instead.
+build:
+  docker:
+    web: Dockerfile
+  config:
+    NEXT_PUBLIC_API_BASE_URL: https://resili-gateway.herokuapp.com

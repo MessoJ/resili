@@ -1,0 +1,27 @@
+{
+  "name": "resili",
+  "description": "Climate-risk and anticipatory-action infrastructure for the Lake Victoria Basin. This blueprint provisions the API gateway; the ML service and console are separate container apps (see scripts/heroku-setup.sh and docs/DEPLOY-HEROKU.md).",
+  "repository": "https://github.com/MessoJ/resili",
+  "keywords": ["climate", "flood", "anticipatory-action", "kenya", "go", "postgis"],
+  "stack": "container",
+  "env": {
+    "ML_SERVICE_URL": {
+      "description": "Public URL of the forecast-ingest ML service.",
+      "value": "https://resili-forecast.herokuapp.com"
+    },
+    "PAYOUT_ADAPTER": {
+      "description": "mock (deterministic, demo-safe) or live (real Daraja + Africa's Talking).",
+      "value": "mock"
+    }
+  },
+  "addons": [
+    "heroku-postgresql:essential-0",
+    "heroku-redis:mini"
+  ],
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+# Heroku container-stack manifest for the resili forecast-ingest ML service.
+#
+# The image trains the XGBoost model at build time, so startup is instant and
+# the running dyno never depends on stage-time training data. CI normally pushes
+# the image to the Heroku Container Registry; this manifest keeps
+# `git push heroku` working for manual deploys.
+build:
+  docker:
+    web: Dockerfile

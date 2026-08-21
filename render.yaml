@@ -1,0 +1,99 @@
+# resili — Render Blueprint (Infrastructure as Code).
+#
+# Deploys the three container services + a PostGIS Postgres + Redis. Render
+# injects $PORT into every web service; all three services already bind it.
+#
+# Cross-service URLs (ML_SERVICE_URL, NEXT_PUBLIC_API_BASE_URL) are marked
+# sync:false because they need the full https://<host> form — set them once
+# after the first deploy (or let scripts/render-deploy.sh / the API wire them).
+#
+# Secrets (Mapbox token, Daraja + Africa's Talking) are sync:false: set them in
+# the Render dashboard or via the API; never commit real values.
+
+databases:
+  - name: resili-db
+    plan: free
+    postgresMajorVersion: "16"
+    # PostGIS ships with Render Postgres; enable it once with:
+    #   CREATE EXTENSION IF NOT EXISTS postgis;
+
+services:
+  - type: redis
+    name: resili-redis
+    plan: free
+    ipAllowList: []
+
+  # 1) ML forecast service — trains the model at build time.
+  - type: web
+    name: resili-forecast
+    runtime: docker
+    plan: free
+    rootDir: services/forecast-ingest
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: resili-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: resili-redis
+          property: connectionString
+
+  # 2) API gateway — proxies the ML service, serves ledger/triggers/USSD.
+  - type: web
+    name: resili-gateway
+    runtime: docker
+    plan: free
+    rootDir: services/gateway
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    envVars:
+      - key: ML_SERVICE_URL
+        sync: false # https://resili-forecast.onrender.com
+      - key: DATABASE_URL
+        fromDatabase:
+          name: resili-db
+          property: connectionString
+      - key: PAYOUT_ADAPTER
+        value: mock
+      - key: DARAJA_ENV
+        value: sandbox
+      - key: DARAJA_CONSUMER_KEY
+        sync: false
+      - key: DARAJA_CONSUMER_SECRET
+        sync: false
+      - key: DARAJA_BUSINESS_SHORT_CODE
+        sync: false
+      - key: DARAJA_INITIATOR_NAME
+        sync: false
+      - key: DARAJA_SECURITY_CREDENTIAL
+        sync: false
+      - key: DARAJA_B2C_RESULT_URL
+        sync: false
+      - key: DARAJA_QUEUE_TIMEOUT_URL
+        sync: false
+      - key: AFRICAS_TALKING_USERNAME
+        value: sandbox
+      - key: AFRICAS_TALKING_API_KEY
+        sync: false
+      - key: AFRICAS_TALKING_SENDER
+        sync: false
+
+  # 3) Console (Next.js PWA) — NEXT_PUBLIC_* are inlined at build time.
+  - type: web
+    name: resili-console
+    runtime: docker
+    plan: free
+    rootDir: apps/console
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    envVars:
+      - key: NEXT_PUBLIC_API_BASE_URL
+        sync: false # https://resili-gateway.onrender.com
+      - key: NEXT_PUBLIC_MAPBOX_TOKEN
+        sync: false

@@ -1,0 +1,84 @@
+name: Deploy to Heroku
+
+# Continuous delivery: on every green push to master, build each service's
+# production image and release it to its own Heroku app via the Heroku Container
+# Registry. Order matters — the ML service backs the gateway, and the console is
+# built against the gateway's public URL.
+#
+# Required GitHub repository secrets:
+#   HEROKU_API_KEY            - Heroku API token (Account settings → API key)
+#   NEXT_PUBLIC_MAPBOX_TOKEN  - public Mapbox "pk." token for the map basemap
+#
+# Optional repository variables (sensible defaults below):
+#   HEROKU_ML_APP        (default: resili-forecast)
+#   HEROKU_GATEWAY_APP   (default: resili-gateway)
+#   HEROKU_CONSOLE_APP   (default: resili-console)
+
+on:
+  push:
+    branches: [master, main]
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-heroku
+  cancel-in-progress: false
+
+env:
+  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+  HD_ML_APP: ${{ vars.HEROKU_ML_APP || 'resili-forecast' }}
+  HD_GATEWAY_APP: ${{ vars.HEROKU_GATEWAY_APP || 'resili-gateway' }}
+  HD_CONSOLE_APP: ${{ vars.HEROKU_CONSOLE_APP || 'resili-console' }}
+
+jobs:
+  deploy:
+    name: Build & release
+    runs-on: ubuntu-latest
+    # Only deploy when the API key is configured, so forks/PRs don't fail.
+    if: ${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Guard — require HEROKU_API_KEY
+        run: |
+          if [ -z "${HEROKU_API_KEY}" ]; then
+            echo "::error::HEROKU_API_KEY secret is not set — skipping deploy."
+            exit 1
+          fi
+
+      - name: Log in to the Heroku Container Registry
+        run: heroku container:login
+
+      # 1) ML service — trains the model at build time.
+      - name: Deploy forecast-ingest (ML)
+        working-directory: services/forecast-ingest
+        run: |
+          heroku container:push web --app "$HD_ML_APP"
+          heroku container:release web --app "$HD_ML_APP"
+
+      # 2) Gateway — points at the ML service via ML_SERVICE_URL config var.
+      - name: Deploy gateway
+        working-directory: services/gateway
+        run: |
+          heroku container:push web --app "$HD_GATEWAY_APP"
+          heroku container:release web --app "$HD_GATEWAY_APP"
+
+      # 3) Console — NEXT_PUBLIC_* are inlined at build time, so they are passed
+      #    as build args (never as runtime secrets).
+      - name: Deploy console (build against the live gateway URL)
+        working-directory: apps/console
+        run: |
+          GATEWAY_URL="https://${HD_GATEWAY_APP}.herokuapp.com"
+          heroku container:push web --app "$HD_CONSOLE_APP" \
+            --arg NEXT_PUBLIC_API_BASE_URL="$GATEWAY_URL",NEXT_PUBLIC_MAPBOX_TOKEN="${{ secrets.NEXT_PUBLIC_MAPBOX_TOKEN }}"
+          heroku container:release web --app "$HD_CONSOLE_APP"
+
+      - name: Smoke test the released gateway
+        run: |
+          for i in $(seq 1 12); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "https://${HD_GATEWAY_APP}.herokuapp.com/api/v1/health" || true)
+            echo "attempt $i: HTTP $code"
+            [ "$code" = "200" ] && exit 0
+            sleep 10
+          done
+          echo "::error::gateway health check did not return 200"
+          exit 1
