@@ -2,13 +2,13 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install dependencies first for layer caching
+# Copy project metadata and source, then install. The package is built from
+# ./src (setuptools packages.find where=["src"]), so the source must be present
+# before `pip install .` can build the wheel.
 COPY pyproject.toml .
-RUN pip install --no-cache-dir .
-
-# Copy source code
 COPY src/ src/
 COPY tests/ tests/
+RUN pip install --no-cache-dir .
 
 # Train the model at build time so startup is instant
 RUN python -m src.model.train

@@ -31,4 +31,4 @@ VALUES
     ('KE-039-KANO', '2026-08-20T12:00:00Z', 'deterministic-demo-fixture', 'risk-ml-v0.1.0', 95.0, 155.2, 1.25, 6.8, 1.35, 0.55, 'demo-kano-001'),
     ('KE-039-RACHUONYO', '2026-08-20T12:00:00Z', 'deterministic-demo-fixture', 'risk-ml-v0.1.0', 42.5, 68.3, 0.65, -2.1, 0.75, 0.30, 'demo-rachuonyo-001'),
     ('KE-039-NZOIA', '2026-08-20T12:00:00Z', 'deterministic-demo-fixture', 'risk-ml-v0.1.0', 165.8, 260.5, 2.05, 15.7, 1.95, 0.82, 'demo-nzoia-001')
-ON CONFLICT (inputs_hash) DO NOTHING;
+ON CONFLICT (inputs_hash) WHERE deleted_at IS NULL DO NOTHING;

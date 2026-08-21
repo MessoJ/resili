@@ -1,6 +1,7 @@
 services:
   postgis:
     image: postgis/postgis:16-3.4
+    restart: unless-stopped
     environment:
       POSTGRES_DB: resili
       POSTGRES_USER: resili
@@ -14,11 +15,18 @@ services:
       retries: 12
     volumes:
       - postgis-data:/var/lib/postgresql/data
-      - ./migrations:/docker-entrypoint-initdb.d/migrations
-      - ./data:/docker-entrypoint-initdb.d/data
+      # The Postgres init entrypoint only executes files placed *directly* in
+      # /docker-entrypoint-initdb.d (it does not recurse into sub-directories)
+      # and runs them in alphabetical order. Mount each script individually with
+      # a numeric prefix so migrations run before the data seeds.
+      - ./migrations/0001_risk_and_trigger_audit.sql:/docker-entrypoint-initdb.d/01_0001_risk_and_trigger_audit.sql:ro
+      - ./migrations/0002_ward_geometry_and_hazards.sql:/docker-entrypoint-initdb.d/02_0002_ward_geometry_and_hazards.sql:ro
+      - ./data/seed-wards.sql:/docker-entrypoint-initdb.d/03_seed-wards.sql:ro
+      - ./data/seed-evacuation-centers.sql:/docker-entrypoint-initdb.d/04_seed-evacuation-centers.sql:ro
 
   redis:
     image: redis:7-alpine
+    restart: unless-stopped
     ports:
       - "6379:6379"
     healthcheck:
@@ -31,6 +39,7 @@ services:
     build:
       context: ../services/forecast-ingest
       dockerfile: Dockerfile
+    restart: unless-stopped
     ports:
       - "8001:8001"
     environment:
@@ -39,6 +48,13 @@ services:
     depends_on:
       postgis:
         condition: service_healthy
+    healthcheck:
+      # python:3.11-slim ships no curl/wget; use the stdlib instead.
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8001/health').status==200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
 
   gateway:
     build:
@@ -46,6 +62,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
+    restart: unless-stopped
     environment:
       GATEWAY_PORT: "8080"
       ML_SERVICE_URL: http://forecast-ingest:8001
@@ -54,7 +71,14 @@ services:
       postgis:
         condition: service_healthy
       forecast-ingest:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      # alpine runtime image ships busybox wget.
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
 
 volumes:
   postgis-data:
