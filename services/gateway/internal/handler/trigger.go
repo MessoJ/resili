@@ -25,11 +25,11 @@ func NewTriggerHandler() *TriggerHandler {
 }
 
 type triggerRequest struct {
-	TriggerID      string    `json:"trigger_id"`
-	WardID         string    `json:"ward_id"`
-	RiskScore      float64   `json:"risk_score"`
-	LeadDays       int       `json:"lead_days"`
-	IdempotencyKey string    `json:"idempotency_key"`
+	TriggerID      string     `json:"trigger_id"`
+	WardID         string     `json:"ward_id"`
+	RiskScore      float64    `json:"risk_score"`
+	LeadDays       int        `json:"lead_days"`
+	IdempotencyKey string     `json:"idempotency_key"`
 	Approvals      []approval `json:"approvals"`
 }
 
