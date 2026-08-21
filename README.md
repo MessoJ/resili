@@ -1,10 +1,10 @@
-# Rezili
+# Resili
 
 **Climate risk intelligence that helps communities act before the water arrives.**
 
 ---
 
-## What Rezili Does
+## What Resili Does
 
 Every year the rains come to western Kenya and people near the Nyando, Nzoia, and Yala rivers wait to see if this season will be the one that floods their homes. KMD issues forecasts. NDMA coordinates response. But the gap between a national 5-day forecast and a ward chief knowing whether to move people out of Kano Plains — that gap is measured in hours nobody has and data nobody can access.
 
