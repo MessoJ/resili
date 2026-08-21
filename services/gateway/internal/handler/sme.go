@@ -6,19 +6,20 @@ import (
 	"time"
 )
 
-// Teammate 3 (Backend / Go Dev) Skeleton Handler: SME Climate Preparedness Endpoint
+// SME Climate Preparedness Endpoint.
 //
-// PURPOSE:
-// Exposes structured climate preparedness checklists for local SMEs, agro-dealers,
-// and cooperative societies operating in the specified ward.
+// Exposes ward-tailored climate preparedness checklists for local SMEs,
+// agro-dealers, and cooperative societies. Advisories are decision-support only
+// and are explicitly attributed to KMD/NDMA and county authorities per the
+// climate-safety guardrails (we never impersonate an official warning source).
 
 type SmeAdvisoryResponse struct {
-	WardID        string    `json:"ward_id"`
-	RiskBand      string    `json:"risk_band"`
-	GeneratedAt   string    `json:"generated_at"`
-	Advisories    []string  `json:"advisories"`
-	EmergencyDesk string    `json:"emergency_desk"`
-	Attribution   string    `json:"attribution"`
+	WardID        string   `json:"ward_id"`
+	RiskBand      string   `json:"risk_band"`
+	GeneratedAt   string   `json:"generated_at"`
+	Advisories    []string `json:"advisories"`
+	EmergencyDesk string   `json:"emergency_desk"`
+	Attribution   string   `json:"attribution"`
 }
 
 type SmeHandler struct{}
@@ -43,7 +44,8 @@ func (h *SmeHandler) GetSmeAdvisory(w http.ResponseWriter, r *http.Request) {
 		"Review sub-county emergency contact details",
 	}
 
-	if wardID == "KE-039-NYANDO" || wardID == "KE-039-BUDALANGI" {
+	switch wardID {
+	case "KE-039-NYANDO", "KE-039-BUDALANGI":
 		riskBand = "severe"
 		advisories = []string{
 			"Elevate inventory & perishable grain bags at least 1m above ground level",
@@ -51,10 +53,13 @@ func (h *SmeHandler) GetSmeAdvisory(w http.ResponseWriter, r *http.Request) {
 			"Relocate mobile stock and livestock to designated ward high ground",
 			"Confirm M-Pesa business wallet liquidity for anticipatory supply purchase",
 		}
+	case "KE-039-KANO":
+		riskBand = "high"
+		advisories = []string{
+			"Secure outdoor market stalls against high winds and runoff",
+			"Clear silt and debris from local rice irrigation access channels",
+		}
 	}
-
-	// TODO (Teammate 3): Add a check for "KE-039-KANO" to return riskBand = "high"
-	// with advisory: "Secure outdoor trading stalls and clear silt from access roads"
 
 	resp := SmeAdvisoryResponse{
 		WardID:        wardID,
