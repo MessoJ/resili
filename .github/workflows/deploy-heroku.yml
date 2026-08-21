@@ -1,11 +1,17 @@
 name: Deploy to Heroku
 
-# Continuous delivery: on every green push to master, build each service's
-# production image and release it to its own Heroku app via the Heroku Container
-# Registry. Order matters — the ML service backs the gateway, and the console is
-# built against the gateway's public URL.
+# OPTIONAL continuous delivery to Heroku. The project's primary live target is
+# Render, which auto-deploys all three services on every push to master (no
+# workflow needed — see render.yaml + docs/DEPLOY-HEROKU.md). This workflow is a
+# ready-to-use alternative: it stays GREEN and simply skips when HEROKU_API_KEY
+# is not configured, and performs a full container-registry release when it is.
 #
-# Required GitHub repository secrets:
+# On every green push to master it builds each service's production image and
+# releases it to its own Heroku app via the Heroku Container Registry. Order
+# matters — the ML service backs the gateway, and the console is built against
+# the gateway's public URL.
+#
+# To enable, set these GitHub repository secrets:
 #   HEROKU_API_KEY            - Heroku API token (Account settings → API key)
 #   NEXT_PUBLIC_MAPBOX_TOKEN  - public Mapbox "pk." token for the map basemap
 #
@@ -38,18 +44,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Guard — require HEROKU_API_KEY
+      # Skip (green, not failed) when Heroku isn't configured — Render is the
+      # primary target. Downstream steps run only when enabled == 'true'.
+      - name: Detect Heroku configuration
+        id: guard
         run: |
-          if [ -z "${HEROKU_API_KEY}" ]; then
-            echo "::error::HEROKU_API_KEY secret is not set — skipping deploy."
-            exit 1
+          if [ -n "${HEROKU_API_KEY}" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "HEROKU_API_KEY is set — proceeding with Heroku deploy."
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "HEROKU_API_KEY not set — skipping Heroku deploy (Render auto-deploys)."
           fi
 
       - name: Log in to the Heroku Container Registry
+        if: steps.guard.outputs.enabled == 'true'
         run: heroku container:login
 
       # 1) ML service — trains the model at build time.
       - name: Deploy forecast-ingest (ML)
+        if: steps.guard.outputs.enabled == 'true'
         working-directory: services/forecast-ingest
         run: |
           heroku container:push web --app "$HD_ML_APP"
@@ -57,6 +71,7 @@ jobs:
 
       # 2) Gateway — points at the ML service via ML_SERVICE_URL config var.
       - name: Deploy gateway
+        if: steps.guard.outputs.enabled == 'true'
         working-directory: services/gateway
         run: |
           heroku container:push web --app "$HD_GATEWAY_APP"
@@ -65,6 +80,7 @@ jobs:
       # 3) Console — NEXT_PUBLIC_* are inlined at build time, so they are passed
       #    as build args (never as runtime secrets).
       - name: Deploy console (build against the live gateway URL)
+        if: steps.guard.outputs.enabled == 'true'
         working-directory: apps/console
         run: |
           GATEWAY_URL="https://${HD_GATEWAY_APP}.herokuapp.com"
@@ -73,6 +89,7 @@ jobs:
           heroku container:release web --app "$HD_CONSOLE_APP"
 
       - name: Smoke test the released gateway
+        if: steps.guard.outputs.enabled == 'true'
         run: |
           for i in $(seq 1 12); do
             code=$(curl -s -o /dev/null -w "%{http_code}" "https://${HD_GATEWAY_APP}.herokuapp.com/api/v1/health" || true)

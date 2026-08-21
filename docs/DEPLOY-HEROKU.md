@@ -1,7 +1,47 @@
-# Deploying resili to Heroku
+# Deploying resili
 
-resili is three container services deployed as three Heroku apps that share one
-PostGIS database and one Redis:
+resili ships two fully-automated deploy paths: **Render (primary, live)** and
+**Heroku (alternative)**. Both build the same three container services from this
+repo and honour the platform-injected `$PORT`.
+
+## Live on Render (primary)
+
+The platform is deployed and running on Render (see `render.yaml`):
+
+| Service           | Live URL                                 |
+| ----------------- | ---------------------------------------- |
+| Console (PWA)     | https://resili-console.onrender.com      |
+| API gateway (Go)  | https://resili-gateway.onrender.com      |
+| ML forecast API   | https://resili-forecast.onrender.com     |
+
+- **CD is automatic:** each service has `autoDeploy: yes`, so every push to
+  `master` rebuilds and redeploys it — no extra workflow required.
+- **No database needed:** ward risk is served by the ML model's deterministic
+  per-ward snapshots and the audit ledger / triggers are in-memory, so the stack
+  runs on Render's free tier. (Add the `resili-db`/`resili-redis` blocks in
+  `render.yaml` only if you later need persistent storage.)
+- **Payouts** default to `PAYOUT_ADAPTER=mock` (demo-safe); set the Daraja /
+  Africa's Talking config vars + `PAYOUT_ADAPTER=live` on `resili-gateway` to go
+  live.
+- **Free-tier note:** free instances cold-start after ~15 min idle and may drop
+  the occasional request; the console degrades gracefully to deterministic demo
+  data and self-heals on its 60 s refresh. Upgrade any service to a paid
+  instance to remove cold starts.
+
+### Recreate the Render stack from scratch
+
+Either connect the repo in the Render dashboard and "New → Blueprint" (uses
+`render.yaml`), or create the three Docker web services via the API with
+`runtime=docker`, `plan=free`, `region=frankfurt`, wiring the gateway's
+`ML_SERVICE_URL` and the console's `NEXT_PUBLIC_API_BASE_URL` /
+`NEXT_PUBLIC_MAPBOX_TOKEN`.
+
+---
+
+## Deploying to Heroku (alternative)
+
+resili can equally run as three Heroku apps that share one PostGIS database and
+one Redis:
 
 | Service            | Path                        | Heroku app (default) | Stack     |
 | ------------------ | --------------------------- | -------------------- | --------- |
