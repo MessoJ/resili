@@ -1,9 +1,9 @@
-/* resili Operations Console — Design System */
+/* resili Console — Design System */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-  /* Core palette — dark mode tailored for operations consoles */
+  /* Core palette — dark mode tailored for consoles */
   --bg-primary: #0a0e17;
   --bg-secondary: #111827;
   --bg-card: #1a2236;

@@ -5,7 +5,7 @@ import (
 )
 
 // CORS adds Cross-Origin Resource Sharing headers.
-// Required for the Operations Console portal to call the gateway.
+// Required for the Console portal to call the gateway.
 type CORS struct {
 	handler http.Handler
 }

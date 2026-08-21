@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from typing import Final
 
 import httpx
@@ -55,6 +55,69 @@ LAKE_VICTORIA_STATIONS: Final[list[StationCoordinate]] = [
     StationCoordinate("rachuonyo-east", "KE-039-RACHUONYO", latitude=-0.3833, longitude=34.7500),
     StationCoordinate("nzoia-mouth", "KE-039-NZOIA", latitude=0.0833, longitude=34.0167),
 ]
+
+
+@dataclass(frozen=True, slots=True)
+class ForecastScenario:
+    """
+    Deterministic forecast inputs for a demo ward.
+
+    These encode a specific, reproducible situation ("what the forecast looks
+    like right now") rather than a prediction. Distinct scenarios across wards
+    produce a realistic risk gradient for the operations map instead of a flat
+    all-severe picture.
+    """
+
+    precipitation_mm: float
+    discharge_m3s: float
+    discharge_mean_m3s: float
+    narrative: str
+
+
+# A hand-calibrated snapshot for the judge demo: an active threat on the Nyando
+# and Nzoia systems, elevated risk on the Budalangi delta, and quieter
+# conditions upstream at Kano and Rachuonyo. Values are deterministic so the
+# same map renders on every run without calling live APIs.
+DEMO_FORECAST_SCENARIOS: Final[dict[str, ForecastScenario]] = {
+    "KE-039-NYANDO": ForecastScenario(
+        precipitation_mm=95.0,
+        discharge_m3s=205.0,
+        discharge_mean_m3s=95.0,
+        narrative="Heavy long-rains cell over the upper Nyando; discharge rising fast.",
+    ),
+    "KE-039-NZOIA": ForecastScenario(
+        precipitation_mm=78.0,
+        discharge_m3s=165.0,
+        discharge_mean_m3s=100.0,
+        narrative="Sustained upstream rainfall pushing the lower Nzoia above bankfull.",
+    ),
+    "KE-039-BUDALANGI": ForecastScenario(
+        precipitation_mm=42.0,
+        discharge_m3s=110.0,
+        discharge_mean_m3s=108.0,
+        narrative="Delta discharge edging above normal; a highly exposed dyke line to watch.",
+    ),
+    "KE-039-KANO": ForecastScenario(
+        precipitation_mm=40.0,
+        discharge_m3s=130.0,
+        discharge_mean_m3s=110.0,
+        narrative="Building showers on the Kano plains; discharge starting to rise.",
+    ),
+    "KE-039-RACHUONYO": ForecastScenario(
+        precipitation_mm=11.0,
+        discharge_m3s=62.0,
+        discharge_mean_m3s=100.0,
+        narrative="Largely dry; discharge well below the seasonal mean.",
+    ),
+}
+
+
+def scenario_for_ward(ward_id: str) -> ForecastScenario:
+    """Return the deterministic demo scenario for a ward, if one is configured."""
+    scenario = DEMO_FORECAST_SCENARIOS.get(ward_id)
+    if scenario is None:
+        raise KeyError(f"No demo forecast scenario configured for ward {ward_id}")
+    return scenario
 
 
 async def fetch_weather_forecast(
@@ -98,7 +161,7 @@ async def fetch_weather_forecast(
     )
     df["station_id"] = station.station_id
     df["ward_id"] = station.ward_id
-    df["fetched_at"] = datetime.now(timezone.utc).isoformat()
+    df["fetched_at"] = datetime.now(UTC).isoformat()
     df["source"] = "open-meteo-forecast"
 
     logger.info(
@@ -150,7 +213,7 @@ async def fetch_river_discharge(
     )
     df["station_id"] = station.station_id
     df["ward_id"] = station.ward_id
-    df["fetched_at"] = datetime.now(timezone.utc).isoformat()
+    df["fetched_at"] = datetime.now(UTC).isoformat()
     df["source"] = "open-meteo-glofas"
 
     logger.info(
@@ -180,7 +243,7 @@ def build_deterministic_forecast(
     """
     base = base_date or date(2026, 8, 20)
     dates = pd.date_range(start=base, periods=forecast_days, freq="D")
-    now_utc = datetime.now(timezone.utc).isoformat()
+    now_utc = datetime.now(UTC).isoformat()
 
     weather = pd.DataFrame(
         {

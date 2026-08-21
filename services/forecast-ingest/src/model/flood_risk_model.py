@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import json
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Final
 
@@ -146,7 +146,6 @@ class FloodRiskModel:
             scale_pos_weight=float(np.sum(y_train == 0)) / max(float(np.sum(y_train == 1)), 1),
             eval_metric="logloss",
             random_state=random_state,
-            use_label_encoder=False,
         )
 
         self.model.fit(

@@ -14,8 +14,8 @@
     "historical_flood_frequency"
   ],
   "metrics": {
-    "accuracy": 1.0,
-    "f1": 1.0,
-    "auc_roc": 1.0
+    "accuracy": 0.77,
+    "f1": 0.6933,
+    "auc_roc": 0.8396
   }
 }

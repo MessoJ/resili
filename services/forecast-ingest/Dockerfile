@@ -15,4 +15,6 @@ RUN python -m src.model.train
 
 EXPOSE 8001
 
-CMD ["uvicorn", "src.api.serve:app", "--host", "0.0.0.0", "--port", "8001"]
+# Honour the platform-provided $PORT (Render, Railway, Cloud Run, etc.),
+# defaulting to 8001 for local runs.
+CMD ["sh", "-c", "uvicorn src.api.serve:app --host 0.0.0.0 --port ${PORT:-8001}"]

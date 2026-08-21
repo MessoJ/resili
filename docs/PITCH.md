@@ -42,10 +42,10 @@ Basin. It does three things that nobody else does together:
    ward level using terrain, flood history, and an XGBoost model trained
    on local catchment data.
 
-2. **Explains** every risk score. The score is not a black box — you can
-   see that 3-day precipitation contributed 28 points, discharge ratio
-   contributed 22 points, and ward vulnerability contributed 15 points.
-   Judges can verify this.
+2. **Explains** every risk score. The score is not a black box — for
+   Nyando you can see that the discharge ratio contributed 14 points,
+   the 5-day precipitation forecast 12 points, and the 3-day forecast
+   12 points. Judges can verify this against the live API.
 
 3. **Acts** on the score. When risk crosses 75 (severe), lead time
    exceeds 3 days, and two people approve, resili triggers an
@@ -53,8 +53,8 @@ Basin. It does three things that nobody else does together:
    recorded in a tamper-evident hash chain."
 
 Demo flow:
-- Show the Operations Console with 5 wards on the map
-- Click Nyando → risk score 82 (severe), red ward, explanation panel
+- Show the Console with 5 wards on the map
+- Click Nyando → risk score 97 (severe), red ward, explanation panel
 - Show the trigger approval workflow (two officers approve)
 - Show the payout receipt with audit hash
 - Show the USSD menu in Swahili
@@ -91,7 +91,7 @@ for its job:
    It's a decision-to-payout pipeline with dual approval, idempotency,
    and an immutable audit chain.
 
-3. **Three access paths.** Operations Console for county officers, USSD for
+3. **Three access paths.** Console for county officers, USSD for
    communities without smartphones, and an API for integration with
    NDMA systems."
 
@@ -114,9 +114,9 @@ with full accountability."
 
 ---
 
-## UNEP Alignment
+## SDG Alignment
 
-Mention these for the UNEP panellists:
+
 - **Sendai Framework Target G**: We track early warning reach as a
   Sendai indicator and export it.
 - **SDG 13 (Climate Action)**: Ward-level climate risk intelligence.

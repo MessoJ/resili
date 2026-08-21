@@ -14,7 +14,9 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-from datetime import datetime, timezone
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+from datetime import UTC, datetime
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -27,37 +29,23 @@ from src.features.ward_features import (
     compute_exposure_score,
     compute_vulnerability_score,
 )
-from src.ingest.open_meteo import LAKE_VICTORIA_STATIONS, build_deterministic_forecast
-from src.model.flood_risk_model import FEATURE_NAMES, MODEL_VERSION, FloodRiskModel
+from src.ingest.open_meteo import (
+    LAKE_VICTORIA_STATIONS,
+    build_deterministic_forecast,
+    scenario_for_ward,
+)
+from src.model.flood_risk_model import MODEL_VERSION, FloodRiskModel
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
-
-app = FastAPI(
-    title="resili Flood Risk ML API",
-    description=(
-        "Impact-based flood risk scoring for the Lake Victoria Basin. "
-        "Scores are decision-support estimates, not certainties. "
-        "Follow directives from KMD, NDMA, and county authorities."
-    ),
-    version=MODEL_VERSION,
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Tighten in production
-    allow_methods=["GET", "POST"],
-    allow_headers=["*"],
-)
 
 # Load or train model at startup
 _model = FloodRiskModel()
 _model_dir = Path(__file__).parent.parent.parent / "trained_model"
 
 
-@app.on_event("startup")
-def load_model() -> None:
-    """Load pre-trained model or train on first run."""
+def _load_model() -> None:
+    """Load a pre-trained model, or train and persist one on first run."""
     if (_model_dir / "flood_risk_model.json").exists():
         _model.load(_model_dir)
         logger.info("Loaded pre-trained model from %s", _model_dir)
@@ -71,6 +59,31 @@ def load_model() -> None:
         _model.is_trained = True
         logger.info("Model trained and loaded at startup")
 
+
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    """Ensure a trained model is available before the service accepts traffic."""
+    _load_model()
+    yield
+
+
+app = FastAPI(
+    title="resili Flood Risk ML API",
+    description=(
+        "Impact-based flood risk scoring for the Lake Victoria Basin. "
+        "Scores are decision-support estimates, not certainties. "
+        "Follow directives from KMD, NDMA, and county authorities."
+    ),
+    version=MODEL_VERSION,
+    lifespan=lifespan,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Tighten in production
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
+)
 
 # --- Request/Response schemas ---
 
@@ -115,6 +128,7 @@ class PredictResponse(BaseModel):
     assessed_at: str
     inputs_hash: str
     source: str
+    situation: str
 
 
 class HealthResponse(BaseModel):
@@ -172,8 +186,14 @@ def predict_ward_risk(request: PredictRequest) -> PredictResponse:
     if station is None:
         raise HTTPException(status_code=404, detail=f"No station configured for ward {request.ward_id}")
 
-    # Build forecast data (deterministic for demo)
-    weather_df, discharge_df = build_deterministic_forecast(station)
+    # Build forecast data from the deterministic demo scenario for this ward.
+    scenario = scenario_for_ward(request.ward_id)
+    weather_df, discharge_df = build_deterministic_forecast(
+        station,
+        precipitation_mm=scenario.precipitation_mm,
+        discharge_m3s=scenario.discharge_m3s,
+        discharge_mean_m3s=scenario.discharge_mean_m3s,
+    )
 
     # Build historical context
     from src.ingest.chirps import build_historical_chirps
@@ -190,7 +210,7 @@ def predict_ward_risk(request: PredictRequest) -> PredictResponse:
     # Run prediction
     prediction = _model.predict(features, request.ward_id)
 
-    now_utc = datetime.now(timezone.utc).isoformat()
+    now_utc = datetime.now(UTC).isoformat()
     inputs_hash = hashlib.sha256(json.dumps(features, sort_keys=True).encode()).hexdigest()[:16]
 
     return PredictResponse(
@@ -204,6 +224,7 @@ def predict_ward_risk(request: PredictRequest) -> PredictResponse:
         assessed_at=now_utc,
         inputs_hash=inputs_hash,
         source="deterministic-demo-fixture",
+        situation=scenario.narrative,
     )
 
 
@@ -212,13 +233,13 @@ def predict_all_wards() -> AllWardsResponse:
     """
     Predict flood risk for all configured wards.
 
-    This is the primary endpoint used by the Operations Console portal
+    This is the primary endpoint used by the Console portal
     to populate the risk map.
     """
     if not _model.is_trained:
         raise HTTPException(status_code=503, detail="Model not yet loaded.")
 
-    now_utc = datetime.now(timezone.utc).isoformat()
+    now_utc = datetime.now(UTC).isoformat()
     results = []
 
     for ward_id in DEMO_WARD_PROFILES:

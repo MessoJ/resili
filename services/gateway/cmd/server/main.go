@@ -4,7 +4,7 @@
 // climate risk intelligence platform. It aggregates data from the
 // Python ML service and TypeScript core packages, applies rate
 // limiting and structured logging, and exposes REST endpoints for
-// the Operations Console portal, USSD callbacks, and CAP alert feeds.
+// the Console portal, USSD callbacks, and CAP alert feeds.
 //
 // Run:
 //
@@ -28,7 +28,12 @@ func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	slog.SetDefault(logger)
 
+	// Prefer GATEWAY_PORT, then the platform-provided PORT (Render, Railway,
+	// Cloud Run, etc.), falling back to 8080 for local development.
 	port := os.Getenv("GATEWAY_PORT")
+	if port == "" {
+		port = os.Getenv("PORT")
+	}
 	if port == "" {
 		port = "8080"
 	}

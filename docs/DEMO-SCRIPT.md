@@ -18,10 +18,16 @@ uvicorn src.api.serve:app --host 0.0.0.0 --port 8001
 cd services/gateway
 go run ./cmd/server
 
-# Terminal 3: Operations Console portal
-cd apps/command-centre
+# Terminal 3: Console portal
+cd apps/console
+cp .env.example .env.local   # then set NEXT_PUBLIC_MAPBOX_TOKEN (Mapbox pk. token)
 npm run dev
 ```
+
+> The map needs a Mapbox token in `apps/console/.env.local`
+> (`NEXT_PUBLIC_MAPBOX_TOKEN`). With the gateway running the console shows a
+> green "Live data" badge and pulls real ML scores; without it, it falls back
+> to deterministic demo data (amber "Demo data" badge) that looks identical.
 
 ---
 
@@ -29,30 +35,31 @@ npm run dev
 
 ### Scene 1: The Problem (1 minute)
 
-Open the Operations Console portal. The map shows 5 wards around Lake
-Victoria. Two are red (Nyando, Budalangi), one orange (Nzoia), one
+Open the Console portal. The map shows 5 wards around Lake
+Victoria. Two are red (Nyando, Nzoia), one orange (Budalangi), one
 yellow (Kano), one green (Rachuonyo).
 
-> "This is the resili Operations Console. Each ward on this map has a live
-> risk score. Nyando is red — score 82 out of 100, severe band. But
+> "This is the resili Console. Each ward on this map has a live
+> risk score. Nyando is red — score 97 out of 100, severe band. But
 > what does that number mean? Let me click on it."
 
 ### Scene 2: Explainable Risk (2 minutes)
 
 Click the Nyando ward. The detail panel shows:
-- Score: 82 (severe)
+- Score: 97 (severe)
 - Top contributors:
-  - 3-day precipitation forecast: 28.5 points
-  - River discharge ratio: 22.1 points
-  - Ward vulnerability: 15.3 points
+  - River discharge ratio: 14.4 points
+  - 5-day precipitation forecast: 12.2 points
+  - 3-day precipitation forecast: 11.6 points
+  - Rainfall anomaly vs. historical: 10.3 points
 - Lead time: 4 days
 - Data source: GloFAS + CHIRPS + Open-Meteo
 
-> "Every number here is traceable. The 3-day precipitation forecast
-> comes from Open-Meteo, which mirrors ECMWF data. The discharge ratio
-> comes from GloFAS — the river is at 1.9 times its long-term average.
-> And the ward vulnerability score reflects that 72% of Nyando is in
-> the flood plain and 58% of households are below the poverty line.
+> "Every number here is traceable. The precipitation forecast comes
+> from Open-Meteo, which mirrors ECMWF data. The discharge ratio comes
+> from GloFAS — the river is at 1.7 times its long-term average. And the
+> ward exposure score reflects that 72% of Nyando is in the flood plain
+> and 58% of households are below the poverty line.
 >
 > This is not a black box. If a county officer asks 'why is Nyando
 > severe?', the system shows exactly why."
@@ -69,17 +76,20 @@ curl http://localhost:8001/predict -X POST \
 
 > "Under the hood, we trained an XGBoost model on 500 labelled
 > observations calibrated to real Nyando catchment statistics. The
-> model takes 11 features — precipitation, discharge, soil moisture,
-> exposure, vulnerability — and outputs a probability of flood impact.
-> We got 85% accuracy and 0.90 AUC-ROC on held-out data."
+> labels are drawn probabilistically with noise, so the signal is
+> genuinely non-separable — no fake 100% accuracy. The model takes 11
+> features — precipitation, discharge, soil moisture, exposure,
+> vulnerability — and outputs a probability of flood impact. We got
+> 77% accuracy and 0.84 AUC-ROC on held-out data."
 
 ### Scene 4: Trigger + Approval (2 minutes)
 
 Go to the Trigger panel in the dashboard.
 
-> "Now the score is 82 and lead time is 4 days. That meets our trigger
-> threshold. But we can't just send money — that would be reckless.
-> resili requires two-person approval."
+> "Now the score is 97 and lead time is 4 days. That meets our trigger
+> threshold — a score of at least 75 with at least 3 days of lead time.
+> But we can't just send money — that would be reckless. resili requires
+> two-person approval."
 
 Show the approval workflow:
 1. County officer approves

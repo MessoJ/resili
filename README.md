@@ -33,7 +33,7 @@ It's not a weather app. It's a decision-support system that turns "it might rain
                    └────────┬────────────────────┬──────────┘
                             │                    │
             ┌───────────────▼──┐       ┌─────────▼────────┐
-            │  PostGIS + Redis │       │ Operations Console
+            │  PostGIS + Redis │       │ Console
             │                  │       │ (Next.js)        │
             │ • Ward geometry  │       │ • Live risk map  │
             │ • Risk history   │       │ • Trigger flow   │
@@ -49,7 +49,7 @@ It's not a weather app. It's a decision-support system that turns "it might rain
 | **Python** | Data ingest, XGBoost flood risk model, FastAPI server | ML ecosystem, pandas/xarray for climate data |
 | **Go** | API Gateway with rate limiting, USSD handler, CAP server | Fast single-binary, great concurrency for real-time |
 | **TypeScript** | Core business logic (risk scoring, triggers, ledger, payout) | Strong types, testable, existing monorepo |
-| **Next.js** | Operations Console portal | React, SSR for low-bandwidth |
+| **Next.js** | Console portal | React, SSR for low-bandwidth |
 | **SQL/PostGIS** | Migrations, ward geometry, spatial queries | Data integrity, geospatial |
 
 ## Data Sources
@@ -89,8 +89,8 @@ uvicorn src.api.serve:app --port 8001
 cd services/gateway
 go run ./cmd/server
 
-# 4. Start Operations Console
-cd apps/command-centre
+# 4. Start Console
+cd apps/console
 npm run dev
 
 # Or use Docker for everything:

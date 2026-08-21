@@ -3,7 +3,7 @@ import "./globals.css";
 import "leaflet/dist/leaflet.css";
 
 export const metadata: Metadata = {
-  title: "resili — Operations Console",
+  title: "resili — Console",
   description:
     "Climate risk intelligence and anticipatory action for the Lake Victoria Basin. " +
     "Decision-support estimates — follow KMD, NDMA, and county directives.",

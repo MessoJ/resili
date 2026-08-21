@@ -31,6 +31,7 @@ export default function RiskMap({
 
   useEffect(() => {
     if (!mapContainer.current) return;
+    if (!MAPBOX_TOKEN) return; // No token — render the setup hint instead.
 
     mapboxgl.accessToken = MAPBOX_TOKEN;
 
@@ -152,6 +153,37 @@ export default function RiskMap({
       });
     }
   }, [selectedWard]);
+
+  if (!MAPBOX_TOKEN) {
+    return (
+      <div
+        style={{
+          position: "relative",
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#0a0e17",
+          color: "#f1f5f9",
+          padding: "24px",
+          textAlign: "center",
+        }}
+      >
+        <div style={{ maxWidth: "420px" }}>
+          <div style={{ fontSize: "15px", fontWeight: 700, marginBottom: "8px" }}>
+            Map basemap not configured
+          </div>
+          <div style={{ fontSize: "13px", color: "#94a3b8", lineHeight: 1.5 }}>
+            Set <code>NEXT_PUBLIC_MAPBOX_TOKEN</code> in{" "}
+            <code>apps/console/.env.local</code> (copy from{" "}
+            <code>.env.example</code>) and restart the dev server to render the
+            interactive ward risk map.
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>

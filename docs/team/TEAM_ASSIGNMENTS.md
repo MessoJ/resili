@@ -5,7 +5,7 @@ Here is how our 5-person team is structured and the exact files each person owns
 
 ---
 
-## 🏛️ Role 1: Solution Architect / Data & ML / Pitch (Lead / You)
+## 🏛️ Role 1: Solution Architect / Data & ML / Pitch (Lead /fmeso)
 - **Focus:** System design, climate data ingest, ML flood risk model, data contracts, pitch deck & judge demo.
 - **Owned Packages:**
   - `services/forecast-ingest/` (Python ML pipeline, XGBoost model, GloFAS/CHIRPS clients, FastAPI)
@@ -15,11 +15,11 @@ Here is how our 5-person team is structured and the exact files each person owns
 ---
 
 ## 🎨 Role 2: Frontend Developer (Teammate 2)
-- **Focus:** Operations Console UI, Mapbox/Leaflet views, Ward cards, and SME climate resilience features.
+- **Focus:** Console UI, Mapbox/Leaflet views, Ward cards, and SME climate resilience features.
 - **Owned Files:**
-  - `apps/command-centre/src/components/SmePreparednessCard.tsx`
-  - `apps/command-centre/src/components/WardList.tsx`
-  - `apps/command-centre/src/components/DetailPanel.tsx`
+  - `apps/console/src/components/SmePreparednessCard.tsx`
+  - `apps/console/src/components/WardList.tsx`
+  - `apps/console/src/components/DetailPanel.tsx`
 - **Instructions & Simple TODOs:** See [`docs/team/TEAMMATE_2_FRONTEND.md`](TEAMMATE_2_FRONTEND.md)
 
 ---
@@ -47,7 +47,7 @@ Here is how our 5-person team is structured and the exact files each person owns
 ## 📱 Role 5: Mobile, USSD & Offline UX (Teammate 5)
 - **Focus:** Africa's Talking USSD flows in Swahili, low-bandwidth PWA offline caching, and community testing.
 - **Owned Files:**
-  - `apps/command-centre/public/sw.js`
-  - `apps/command-centre/public/manifest.json`
+  - `apps/console/public/sw.js`
+  - `apps/console/public/manifest.json`
   - `packages/ussd-core/src/index.ts`
 - **Instructions & Simple TODOs:** See [`docs/team/TEAMMATE_5_MOBILE_PWA.md`](TEAMMATE_5_MOBILE_PWA.md)

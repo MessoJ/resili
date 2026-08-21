@@ -13,6 +13,11 @@ import { DEMO_WARD_RISKS, DEMO_LEDGER, DEMO_ALERTS } from "@/lib/demo-data";
 // Leaflet must be loaded client-side only (no SSR for maps)
 const RiskMap = dynamic(() => import("@/components/RiskMap"), { ssr: false });
 
+// Base URL of the Go API gateway. Configurable via env so the console can
+// point at a staging/prod gateway without a code change; defaults to local.
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+
 type TabId = "wards" | "triggers" | "alerts" | "ledger";
 
 export default function CommandCentre() {
@@ -20,16 +25,22 @@ export default function CommandCentre() {
   const [selectedWard, setSelectedWard] = useState<WardRisk | null>(null);
   const [activeTab, setActiveTab] = useState<TabId>("wards");
   const [ledger, setLedger] = useState<LedgerData>(DEMO_LEDGER);
-  const [alerts, setAlerts] = useState<AlertData[]>(DEMO_ALERTS);
+  const [alerts] = useState<AlertData[]>(DEMO_ALERTS);
+  const [isLive, setIsLive] = useState<boolean>(false);
   const [lastUpdate, setLastUpdate] = useState<string>(
     new Date().toLocaleTimeString("en-KE", { timeZone: "Africa/Nairobi" })
   );
 
-  // Try to fetch live data from the API gateway; fall back to demo data
+  // Try to fetch live data from the API gateway; fall back to demo data.
+  // The gateway proxies live ward risk from the Python ML service and
+  // serves the audit ledger, so a single reachable gateway lights up the
+  // whole console. If any call fails we keep the deterministic fixtures.
   useEffect(() => {
     async function fetchData() {
+      let anyLive = false;
+
       try {
-        const response = await fetch("http://localhost:8080/api/v1/wards/risk/all");
+        const response = await fetch(`${API_BASE_URL}/api/v1/wards/risk/all`);
         if (response.ok) {
           const data = await response.json();
           if (data.features && data.features.length > 0) {
@@ -41,11 +52,27 @@ export default function CommandCentre() {
               })
             );
             setWards(liveWards);
+            anyLive = true;
           }
         }
       } catch {
-        // API unavailable — use demo data (already set)
+        // Ward risk endpoint unavailable — keep demo ward data.
       }
+
+      try {
+        const ledgerResp = await fetch(`${API_BASE_URL}/api/v1/ledger`);
+        if (ledgerResp.ok) {
+          const ledgerData = (await ledgerResp.json()) as LedgerData;
+          if (ledgerData.events && ledgerData.events.length > 0) {
+            setLedger(ledgerData);
+            anyLive = true;
+          }
+        }
+      } catch {
+        // Ledger endpoint unavailable — keep demo ledger.
+      }
+
+      setIsLive(anyLive);
       setLastUpdate(
         new Date().toLocaleTimeString("en-KE", { timeZone: "Africa/Nairobi" })
       );
@@ -69,7 +96,7 @@ export default function CommandCentre() {
         <div className="app-header__brand">
           <div className="app-header__logo">R</div>
           <div>
-            <div className="app-header__title">resili Operations Console</div>
+            <div className="app-header__title">resili Console</div>
             <div className="app-header__subtitle">
               Lake Victoria Basin — Climate Risk Intelligence
             </div>
@@ -77,8 +104,21 @@ export default function CommandCentre() {
         </div>
 
         <div className="app-header__status">
+          <div
+            className="status-indicator"
+            title={
+              isLive
+                ? "Connected to the API gateway — live ML risk scores"
+                : "Gateway unreachable — showing deterministic demo data"
+            }
+          >
+            <span
+              className="status-dot"
+              style={{ background: isLive ? "#10b981" : "#f59e0b" }}
+            />
+            {isLive ? "Live data" : "Demo data"}
+          </div>
           <div className="status-indicator">
-            <span className="status-dot" />
             Model: risk-ml-v0.1.0
           </div>
           <div className="status-indicator">

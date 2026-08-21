@@ -20,7 +20,7 @@ Three surfaces, one brain:
 | Surface | User | Tech |
 |---|---|---|
 | **Mobile app (offline-first)** | Farmer / household in Kano Plains, Budalangi, Nyando | Expo + SQLite + SMS/USSD fallback |
-| **Web command centre** | Kisumu County Climate Change Unit, NDMA, Red Cross, SME | Next.js 15 App Router + MapLibre |
+| **Web console** | Kisumu County Climate Change Unit, NDMA, Red Cross, SME | Next.js 15 App Router + MapLibre |
 | **USSD / SMS** | The 40% with feature phones | Go service + Africa's Talking |
 
 Powered by: GloFAS river-discharge forecasts + ERA5 reanalysis + CMIP6 projections + crowdsourced ground truth, fused by an ML risk model, executed by an on-chain-anchored trigger engine, paid out over M-Pesa B2C.
@@ -123,7 +123,7 @@ Offline-first mobile (SQLite queue + sync), USSD menus, SMS alerts in Dholuo/Swa
 ```
 apps/
   mobile/        Expo SDK 54, Expo Router, offline-first SQLite, EN/SW/Dholuo
-  web/           Next.js 15 App Router — county command centre + public risk portal
+  web/           Next.js 15 App Router — county console + public risk portal
 packages/
   api/           tRPC v11 routers: risk, hazard, ward, alert, report, trigger, payout, sme, ledger
   db/            Drizzle + PostGIS (geography), migrations, seed
@@ -236,7 +236,7 @@ Geometric weighting (not a naive sum) so a zero in any pillar cannot be masked �
 5. **Anticipatory payout** — "KES 3,000 sent to 07XX… because Nyando discharge crossed the 5-yr line on 09 Mar. Verify receipt →" (links to ledger proof).
 6. **Preparedness checklist** — offline, gamified, ward-specific.
 
-### 6.2 Web command centre (county / NDMA / Red Cross)
+### 6.2 Web console (county / NDMA / Red Cross)
 1. **Live ward risk map** (MapLibre + PostGIS vector tiles) — choropleth, hazard toggle, horizon slider 0/3/7/14 days.
 2. **Ward drill-down** — score decomposition, historical events, citizen reports cluster overlay, population at risk.
 3. **Trigger console** — define/inspect thresholds, see armed vs fired, dry-run simulation, approve payout batch (2-person rule).
@@ -296,7 +296,7 @@ Kilimo Halisi enforced Kenyan law in code (KVB, VMD, PCPB, NEMA). We do the equi
 - **Backtest script**: replay Nov 2023 + Apr 2024 + May 2018 → report lead time per event.
 - **Checkpoint 2: the backtest number exists.** This number goes on the pitch deck's biggest slide. If lead time is bad, tune thresholds now, not at hour 44.
 
-### HOURS 12–18 — Command Centre v1
+### HOURS 12–18 — Console v1
 - Next.js map with ward choropleth, hazard toggle, horizon slider, drill-down panel with score decomposition.
 - Seed 300 synthetic-but-plausible citizen reports; DBSCAN clustering overlay live.
 - **Checkpoint 3: a stranger can look at the screen and understand which wards are in danger.**

@@ -11,21 +11,11 @@ Tests cover:
 
 from __future__ import annotations
 
-import pytest
-import numpy as np
-import pandas as pd
 from pathlib import Path
 
-from src.ingest.open_meteo import (
-    StationCoordinate,
-    build_deterministic_forecast,
-    LAKE_VICTORIA_STATIONS,
-)
-from src.ingest.chirps import (
-    build_historical_chirps,
-    compute_rainfall_anomaly,
-    ChirpsRainfallRecord,
-)
+import pandas as pd
+import pytest
+
 from src.features.ward_features import (
     DEMO_WARD_PROFILES,
     WardStaticProfile,
@@ -34,9 +24,18 @@ from src.features.ward_features import (
     compute_hazard_features,
     compute_vulnerability_score,
 )
+from src.ingest.chirps import (
+    ChirpsRainfallRecord,
+    build_historical_chirps,
+    compute_rainfall_anomaly,
+)
+from src.ingest.open_meteo import (
+    LAKE_VICTORIA_STATIONS,
+    StationCoordinate,
+    build_deterministic_forecast,
+)
 from src.model.flood_risk_model import FEATURE_NAMES, FloodRiskModel
 from src.model.train import generate_training_data
-
 
 # ── Ingest tests ────────────────────────────────────────────────────
 
@@ -206,7 +205,9 @@ class TestTrainingData:
 class TestFloodRiskModel:
     @pytest.fixture
     def trained_model(self) -> FloodRiskModel:
-        features, labels = generate_training_data(n_samples=300)
+        # Use the production sample size so evaluation metrics are stable rather
+        # than dominated by small-split variance.
+        features, labels = generate_training_data(n_samples=500)
         model = FloodRiskModel()
         model.train(features, labels)
         return model
@@ -219,10 +220,14 @@ class TestFloodRiskModel:
         assert 0 <= trained_model.metrics.auc_roc <= 1
 
     def test_model_achieves_minimum_accuracy(self, trained_model: FloodRiskModel) -> None:
-        # With calibrated synthetic data and XGBoost, we should get >70% accuracy
+        # Data is deliberately non-separable (probabilistic labels with noise),
+        # so we require both credible accuracy and meaningful discrimination.
         assert trained_model.metrics is not None
         assert trained_model.metrics.accuracy >= 0.70, (
             f"Model accuracy {trained_model.metrics.accuracy} is below minimum threshold"
+        )
+        assert trained_model.metrics.auc_roc >= 0.75, (
+            f"Model AUC-ROC {trained_model.metrics.auc_roc} indicates poor discrimination"
         )
 
     def test_prediction_returns_valid_output(self, trained_model: FloodRiskModel) -> None:
@@ -314,6 +319,7 @@ class TestAPI:
     @pytest.fixture
     def client(self):
         from fastapi.testclient import TestClient
+
         from src.api.serve import app
         with TestClient(app) as c:
             yield c
