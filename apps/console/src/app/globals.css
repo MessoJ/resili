@@ -1,48 +1,60 @@
-/* resili Console — Design System */
+/* ============================================================================
+   resili Console — Design System  ·  "Basin"
+   ----------------------------------------------------------------------------
+   A field-operations console for climate-risk decision support in the Lake
+   Victoria Basin. The design is deliberately restrained: the chrome is a
+   desaturated wetland-ink neutral, and the ONLY saturated colour in the whole
+   interface is the four-step flood-risk scale (low→severe). Colour therefore
+   always *means something*. No decorative gradients, no glassmorphism, no
+   blinking "live" dots — the aesthetic is instrument-panel, not dashboard-demo.
+   ============================================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root {
-  /* Core palette — dark mode tailored for consoles */
-  --bg-primary: #0a0e17;
-  --bg-secondary: #111827;
-  --bg-card: #1a2236;
-  --bg-card-hover: #1f2a42;
-  --bg-glass: rgba(26, 34, 54, 0.85);
+  /* ── Surfaces: desaturated wetland ink, warmed a touch away from blue-black */
+  --bg-primary: #0e1513;
+  --bg-secondary: #121a18;
+  --bg-card: #17211e;
+  --bg-card-hover: #1d2925;
+  --bg-inset: #0b110f;
+  --bg-glass: #121a18; /* kept for compatibility; now a solid surface */
 
-  /* Accent colours */
-  --accent-primary: #3b82f6;
-  --accent-primary-dim: rgba(59, 130, 246, 0.15);
-  --accent-success: #10b981;
-  --accent-warning: #f59e0b;
-  --accent-danger: #ef4444;
+  /* ── Instrument accent: a muted slate-cyan. Distinct from every risk hue so
+        interactive chrome never competes with risk colour. Not Tailwind blue. */
+  --accent-primary: #6aa5b5;
+  --accent-primary-dim: rgba(106, 165, 181, 0.14);
+  --accent-success: #45b083;
+  --accent-warning: #d6a13c;
+  --accent-danger: #cf5049;
 
-  /* Risk band colours */
-  --risk-low: #10b981;
-  --risk-moderate: #f59e0b;
-  --risk-high: #f97316;
-  --risk-severe: #ef4444;
-  --risk-low-bg: rgba(16, 185, 129, 0.15);
-  --risk-moderate-bg: rgba(245, 158, 11, 0.15);
-  --risk-high-bg: rgba(249, 115, 22, 0.15);
-  --risk-severe-bg: rgba(239, 68, 68, 0.15);
+  /* ── Risk scale — the only saturated colours in the product */
+  --risk-low: #45b083;
+  --risk-moderate: #d6a13c;
+  --risk-high: #df7a3a;
+  --risk-severe: #cf5049;
+  --risk-low-bg: rgba(69, 176, 131, 0.14);
+  --risk-moderate-bg: rgba(214, 161, 60, 0.14);
+  --risk-high-bg: rgba(223, 122, 58, 0.14);
+  --risk-severe-bg: rgba(207, 80, 73, 0.14);
 
-  /* Text */
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  /* ── Text */
+  --text-primary: #e9efec;
+  --text-secondary: #9fb0aa;
+  --text-muted: #6a7a74;
 
-  /* Borders */
-  --border-subtle: rgba(148, 163, 184, 0.1);
-  --border-active: rgba(59, 130, 246, 0.4);
+  /* ── Hairlines & separators */
+  --border-subtle: rgba(224, 234, 230, 0.08);
+  --border-strong: rgba(224, 234, 230, 0.16);
+  --border-active: rgba(106, 165, 181, 0.45);
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.2);
+  /* ── Shadows: soft depth, never neon glow */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.42);
+  --shadow-lg: 0 14px 40px rgba(0, 0, 0, 0.5);
+  --shadow-ring: 0 0 0 1px var(--border-active);
 
-  /* Spacing */
+  /* ── Spacing */
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
   --space-md: 1rem;
@@ -50,16 +62,21 @@
   --space-xl: 2rem;
   --space-2xl: 3rem;
 
-  /* Border radius */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  /* ── Radii: tighter than the usual rounded-everything look */
+  --radius-sm: 4px;
+  --radius-md: 7px;
+  --radius-lg: 12px;
   --radius-full: 9999px;
 
-  /* Transitions */
-  --transition-fast: 150ms ease;
-  --transition-normal: 250ms ease;
-  --transition-slow: 400ms ease;
+  /* ── Motion */
+  --transition-fast: 130ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 220ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 420ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ── Type families */
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 
 * {
@@ -72,27 +89,44 @@ html, body {
   height: 100%;
   background: var(--bg-primary);
   color: var(--text-primary);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 6px;
+/* Subtle basin texture: two faint contour washes. Nothing flashy — it just
+   stops the large dark areas from reading as a flat template background. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(1200px 700px at 78% -10%, rgba(106, 165, 181, 0.05), transparent 60%),
+    radial-gradient(900px 600px at -5% 110%, rgba(69, 176, 131, 0.04), transparent 55%);
 }
-::-webkit-scrollbar-track {
-  background: var(--bg-primary);
-}
+
+/* Scrollbars — thin and inconspicuous */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: var(--text-muted);
+  background: var(--border-strong);
   border-radius: var(--radius-full);
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+code, .mono { font-family: var(--font-mono); }
 
 /* ── Layout ─────────────────────────────────────────────── */
 
 .app-layout {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-rows: auto 1fr;
   height: 100vh;
@@ -103,9 +137,9 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-sm) var(--space-lg);
-  background: var(--bg-glass);
-  backdrop-filter: blur(12px);
+  padding: 0 var(--space-lg);
+  height: 56px;
+  background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-subtle);
   z-index: 100;
 }
@@ -113,100 +147,128 @@ html, body {
 .app-header__brand {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: 12px;
 }
 
-.app-header__logo {
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(135deg, var(--accent-primary), #8b5cf6);
-  border-radius: var(--radius-sm);
+/* Bespoke basin mark (concentric waterlines) lives in an inline SVG; this just
+   frames it. No gradient fill, no rounded-gradient-square cliché. */
+.app-header__mark {
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 800;
-  font-size: 16px;
-  color: white;
+  color: var(--accent-primary);
+}
+
+.app-header__wordmark {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
 }
 
 .app-header__title {
-  font-size: 18px;
-  font-weight: 700;
-  background: linear-gradient(135deg, var(--text-primary), var(--accent-primary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
 }
 
 .app-header__subtitle {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-muted);
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.14em;
 }
 
+/* Instrument-style status strip: labelled readouts divided by hairlines. */
 .app-header__status {
   display: flex;
-  align-items: center;
-  gap: var(--space-lg);
+  align-items: stretch;
+  height: 100%;
 }
 
-.status-indicator {
+.statbar {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 0 var(--space-lg);
+  border-left: 1px solid var(--border-subtle);
+}
+
+.statbar__label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.statbar__value {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
+  gap: 7px;
   font-size: 12px;
+  font-weight: 600;
   color: var(--text-secondary);
+  font-family: var(--font-mono);
 }
 
-.status-dot {
+/* Source indicator: a small filled/hollow square — deliberately NOT a pulsing
+   circle. Filled = live gateway; hollow ring = deterministic seed data. */
+.source-flag {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
-  background: var(--accent-success);
-  animation: pulse 2s ease-in-out infinite;
+  border-radius: 1px;
+  flex-shrink: 0;
 }
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+.source-flag--live {
+  background: var(--accent-success);
+  box-shadow: 0 0 0 3px rgba(69, 176, 131, 0.18);
+}
+.source-flag--seed {
+  background: transparent;
+  border: 1.5px solid var(--accent-warning);
 }
 
 .app-main {
   display: grid;
-  grid-template-columns: 1fr 400px;
+  grid-template-columns: 1fr 408px;
   overflow: hidden;
 }
 
-/* ── Map Container ──────────────────────────────────────── */
+/* ── Map ────────────────────────────────────────────────── */
 
 .map-container {
   position: relative;
   overflow: hidden;
+  border-right: 1px solid var(--border-subtle);
 }
 
-.map-container .leaflet-container {
+.map-container .leaflet-container,
+.map-container .mapboxgl-map {
   height: 100%;
   width: 100%;
-  background: var(--bg-primary);
+  background: var(--bg-inset);
 }
 
-/* Leaflet dark mode overrides */
-.leaflet-tile-pane {
-  filter: brightness(0.7) contrast(1.2) saturate(0.8);
-}
-
-.leaflet-control-zoom {
+.leaflet-control-zoom,
+.mapboxgl-ctrl-group {
   border: none !important;
+  box-shadow: var(--shadow-md) !important;
 }
 
-.leaflet-control-zoom a {
+.leaflet-control-zoom a,
+.mapboxgl-ctrl-group button {
   background: var(--bg-card) !important;
   color: var(--text-primary) !important;
   border: 1px solid var(--border-subtle) !important;
 }
 
+.mapboxgl-popup-content,
 .leaflet-popup-content-wrapper {
   background: var(--bg-card) !important;
   color: var(--text-primary) !important;
@@ -215,115 +277,225 @@ html, body {
   border: 1px solid var(--border-subtle);
 }
 
-.leaflet-popup-tip {
-  background: var(--bg-card) !important;
+.map-legend {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  color: var(--text-primary);
+  font-size: 11px;
+  z-index: 10;
+  box-shadow: var(--shadow-lg);
+  max-width: 280px;
 }
+
+.map-legend__title {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.map-legend__row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 7px;
+  color: var(--text-secondary);
+}
+
+.map-legend__swatch {
+  width: 12px;
+  height: 6px;
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+
+.map-legend__note {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 10px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Cartographic ward marker — a calm dot with a hairline ring and a solid
+   label chip. No pulsing halo, no neon glow. */
+.ward-marker {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+.ward-marker__dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #0b110f;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+  transition: transform var(--transition-fast);
+}
+.ward-marker__label {
+  margin-top: 5px;
+  padding: 2px 7px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.ward-marker:hover .ward-marker__dot { transform: scale(1.08); }
 
 /* ── Sidebar ────────────────────────────────────────────── */
 
 .sidebar {
   background: var(--bg-secondary);
-  border-left: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
 .sidebar__header {
-  padding: var(--space-lg);
-  border-bottom: 1px solid var(--border-subtle);
+  padding: var(--space-md) var(--space-lg) 0;
 }
 
 .sidebar__title {
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: var(--space-xs);
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: 2px;
 }
 
+.sidebar__eyebrow {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+/* Underline tab bar — segmented, quiet, closer to real analyst tooling than
+   the ubiquitous rounded-pill tab row. */
 .sidebar__tabs {
   display: flex;
-  gap: var(--space-xs);
-  margin-top: var(--space-sm);
+  gap: var(--space-lg);
+  border-bottom: 1px solid var(--border-subtle);
+  margin-top: 10px;
 }
 
 .sidebar__tab {
-  padding: var(--space-xs) var(--space-md);
-  border-radius: var(--radius-full);
+  position: relative;
+  padding: 10px 0;
   font-size: 12px;
   font-weight: 600;
+  letter-spacing: 0.02em;
   cursor: pointer;
   border: none;
   background: transparent;
   color: var(--text-muted);
-  transition: all var(--transition-fast);
+  transition: color var(--transition-fast);
 }
 
-.sidebar__tab:hover {
-  background: var(--bg-card);
-  color: var(--text-secondary);
-}
+.sidebar__tab:hover { color: var(--text-secondary); }
 
-.sidebar__tab--active {
-  background: var(--accent-primary-dim);
-  color: var(--accent-primary);
+.sidebar__tab--active { color: var(--text-primary); }
+
+.sidebar__tab--active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--accent-primary);
+  border-radius: 2px 2px 0 0;
 }
 
 .sidebar__content {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-md);
+  padding: var(--space-lg);
 }
 
 /* ── Ward Cards ─────────────────────────────────────────── */
 
 .ward-card {
+  position: relative;
   background: var(--bg-card);
   border-radius: var(--radius-md);
   padding: var(--space-md);
-  margin-bottom: var(--space-sm);
+  margin-bottom: 10px;
   border: 1px solid var(--border-subtle);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  overflow: hidden;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+/* Thin risk-coloured spine on the card's leading edge — the one place colour
+   is allowed to bleed into the chrome, because it encodes risk. */
+.ward-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--spine, transparent);
 }
 
 .ward-card:hover {
   background: var(--bg-card-hover);
-  border-color: var(--border-active);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
 }
 
 .ward-card--active {
-  border-color: var(--accent-primary);
-  box-shadow: var(--shadow-glow);
+  border-color: var(--border-active);
+  box-shadow: var(--shadow-ring);
 }
 
 .ward-card__header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: var(--space-sm);
 }
 
 .ward-card__name {
   font-weight: 600;
   font-size: 14px;
+  letter-spacing: -0.01em;
 }
 
 .ward-card__score {
-  font-weight: 800;
-  font-size: 20px;
-  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 22px;
+  font-family: var(--font-mono);
+  letter-spacing: -0.02em;
 }
 
 .ward-card__band {
   display: inline-block;
   padding: 2px 8px;
-  border-radius: var(--radius-full);
-  font-size: 11px;
-  font-weight: 600;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.08em;
 }
 
 .ward-card__band--low { background: var(--risk-low-bg); color: var(--risk-low); }
@@ -332,61 +504,39 @@ html, body {
 .ward-card__band--severe { background: var(--risk-severe-bg); color: var(--risk-severe); }
 
 .ward-card__bar {
-  height: 4px;
-  border-radius: 2px;
-  background: var(--bg-primary);
+  height: 3px;
+  border-radius: var(--radius-full);
+  background: var(--bg-inset);
   margin-top: var(--space-sm);
   overflow: hidden;
 }
 
 .ward-card__bar-fill {
   height: 100%;
-  border-radius: 2px;
+  border-radius: var(--radius-full);
   transition: width var(--transition-slow);
 }
 
 /* ── Detail Panel ───────────────────────────────────────── */
 
-.detail-panel {
-  padding: var(--space-lg);
-}
+.detail-panel { padding: 0; }
 
 .detail-panel__title {
-  font-size: 20px;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
   margin-bottom: var(--space-xs);
 }
 
-.detail-panel__score-display {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-sm);
-  margin-bottom: var(--space-lg);
-}
-
-.detail-panel__score-value {
-  font-size: 48px;
-  font-weight: 800;
-  font-family: 'JetBrains Mono', monospace;
-  line-height: 1;
-}
-
-.detail-panel__score-label {
-  font-size: 14px;
-  color: var(--text-muted);
-}
-
-.detail-section {
-  margin-bottom: var(--space-lg);
-}
+.detail-section { margin-bottom: var(--space-lg); }
 
 .detail-section__title {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 10px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.14em;
   color: var(--text-muted);
-  margin-bottom: var(--space-sm);
+  margin-bottom: 10px;
 }
 
 /* Feature contribution bars */
@@ -394,7 +544,7 @@ html, body {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  margin-bottom: var(--space-xs);
+  margin-bottom: 6px;
   font-size: 12px;
 }
 
@@ -409,22 +559,22 @@ html, body {
 
 .feature-bar__track {
   flex: 1;
-  height: 6px;
-  background: var(--bg-primary);
-  border-radius: 3px;
+  height: 5px;
+  background: var(--bg-inset);
+  border-radius: var(--radius-full);
   overflow: hidden;
 }
 
 .feature-bar__fill {
   height: 100%;
-  border-radius: 3px;
+  border-radius: var(--radius-full);
   background: var(--accent-primary);
   transition: width var(--transition-slow);
 }
 
 .feature-bar__value {
   flex: 0 0 40px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--text-muted);
 }
@@ -452,13 +602,11 @@ html, body {
   left: 15px;
   top: 32px;
   bottom: -20px;
-  width: 2px;
+  width: 1px;
   background: var(--border-subtle);
 }
 
-.trigger-step:last-child::before {
-  display: none;
-}
+.trigger-step:last-child::before { display: none; }
 
 .trigger-step__icon {
   width: 32px;
@@ -467,79 +615,76 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 13px;
+  font-family: var(--font-mono);
+  font-weight: 600;
   flex-shrink: 0;
   z-index: 1;
 }
 
 .trigger-step__icon--pending {
-  background: var(--bg-primary);
-  border: 2px solid var(--text-muted);
+  background: var(--bg-inset);
+  border: 1px solid var(--border-strong);
   color: var(--text-muted);
 }
 
 .trigger-step__icon--complete {
   background: var(--accent-success);
-  color: white;
+  color: var(--bg-inset);
 }
 
+/* "active" is shown with a solid accent ring instead of a blinking pulse */
 .trigger-step__icon--active {
-  background: var(--accent-primary);
-  color: white;
-  animation: pulse 2s ease-in-out infinite;
+  background: var(--accent-primary-dim);
+  border: 1px solid var(--accent-primary);
+  color: var(--accent-primary);
 }
 
-.trigger-step__content {
-  flex: 1;
-}
+.trigger-step__content { flex: 1; }
 
 .trigger-step__title {
   font-weight: 600;
   font-size: 13px;
-  margin-bottom: 2px;
+  margin-bottom: 3px;
 }
 
 .trigger-step__detail {
   font-size: 12px;
   color: var(--text-muted);
+  line-height: 1.5;
 }
 
 /* ── Alert Timeline ─────────────────────────────────────── */
 
-.alert-timeline {
-  position: relative;
-}
+.alert-timeline { position: relative; }
 
 .alert-item {
   display: flex;
   gap: var(--space-md);
-  margin-bottom: var(--space-lg);
+  margin-bottom: var(--space-md);
   padding: var(--space-md);
   background: var(--bg-card);
   border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
   border-left: 3px solid;
-  transition: all var(--transition-fast);
+  transition: background var(--transition-fast);
 }
 
-.alert-item:hover {
-  background: var(--bg-card-hover);
-}
+.alert-item:hover { background: var(--bg-card-hover); }
 
 .alert-item--severe { border-left-color: var(--risk-severe); }
 .alert-item--high { border-left-color: var(--risk-high); }
 .alert-item--moderate { border-left-color: var(--risk-moderate); }
 
 .alert-item__time {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--text-muted);
   flex-shrink: 0;
-  width: 65px;
+  width: 46px;
 }
 
-.alert-item__content {
-  flex: 1;
-}
+.alert-item__content { flex: 1; }
 
 .alert-item__title {
   font-weight: 600;
@@ -555,35 +700,15 @@ html, body {
 
 /* ── Audit Ledger ───────────────────────────────────────── */
 
-.ledger-chain {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-}
-
-.ledger-event {
-  background: var(--bg-card);
-  border-radius: var(--radius-sm);
-  padding: var(--space-sm) var(--space-md);
-  margin-bottom: var(--space-xs);
-  border: 1px solid var(--border-subtle);
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-}
-
-.ledger-event__index {
-  color: var(--text-muted);
-  width: 20px;
-}
+.ledger-chain { font-size: 11px; }
 
 .ledger-event__type {
-  padding: 2px 6px;
+  padding: 2px 7px;
   border-radius: var(--radius-sm);
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
-  width: 100px;
+  letter-spacing: 0.06em;
   text-align: center;
 }
 
@@ -598,28 +723,41 @@ html, body {
 }
 
 .ledger-event__type--payout-requested {
-  background: rgba(16, 185, 129, 0.15);
+  background: var(--risk-low-bg);
   color: var(--accent-success);
 }
 
-.ledger-event__hash {
-  color: var(--text-muted);
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.chain-valid {
+.chain-status {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  padding: var(--space-sm) var(--space-md);
-  background: rgba(16, 185, 129, 0.1);
-  border-radius: var(--radius-sm);
-  color: var(--accent-success);
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
   font-size: 12px;
   font-weight: 600;
   margin-bottom: var(--space-md);
+}
+
+.chain-status--valid {
+  background: var(--risk-low-bg);
+  color: var(--accent-success);
+  border: 1px solid rgba(69, 176, 131, 0.3);
+}
+
+.chain-status--invalid {
+  background: var(--risk-severe-bg);
+  color: var(--risk-severe);
+  border: 1px solid rgba(207, 80, 73, 0.3);
+}
+
+/* ── Buttons ────────────────────────────────────────────── */
+
+.btn {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
 }
 
 /* ── Responsive ─────────────────────────────────────────── */
@@ -629,19 +767,16 @@ html, body {
     grid-template-columns: 1fr;
     grid-template-rows: 50vh 1fr;
   }
-
-  .sidebar {
-    border-left: none;
-    border-top: 1px solid var(--border-subtle);
-  }
+  .sidebar { border-top: 1px solid var(--border-subtle); }
+  .map-container { border-right: none; }
 }
 
 @media (max-width: 640px) {
-  .app-header {
-    padding: var(--space-xs) var(--space-md);
-  }
+  .app-header { padding: 0 var(--space-md); }
+  .app-header__subtitle { display: none; }
+  .statbar { padding: 0 var(--space-md); }
+}
 
-  .app-header__subtitle {
-    display: none;
-  }
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
 }
