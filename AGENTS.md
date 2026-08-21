@@ -1,8 +1,8 @@
-# Rezili Engineering Rules
+# resili Engineering Rules
 
 ## Scope
 
-Rezili is climate-risk and anticipatory-action infrastructure for the Lake
+resili is climate-risk and anticipatory-action infrastructure for the Lake
 Victoria Basin. Do not add unrelated marketplace, health-triage, or social
 features.
 

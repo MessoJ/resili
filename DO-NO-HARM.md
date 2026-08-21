@@ -1,6 +1,6 @@
 # Do No Harm
 
-Rezili supports, rather than replaces, Kenyan public warning authorities.
+resili supports, rather than replaces, Kenyan public warning authorities.
 
 - **False alerts:** publish probabilistic language, data source, expiry, and
   uncertainty; require review before high-impact delivery.

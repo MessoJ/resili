@@ -1,4 +1,4 @@
-// Package middleware provides HTTP middleware for the Rezili gateway.
+// Package middleware provides HTTP middleware for the resili gateway.
 package middleware
 
 import (

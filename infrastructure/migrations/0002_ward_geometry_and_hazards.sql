@@ -1,6 +1,6 @@
 -- Migration 0002: Ward geometry, hazard observations, alert log, payout audit
 --
--- Adds the full schema needed for the Rezili climate risk platform.
+-- Adds the full schema needed for the resili climate risk platform.
 -- Designed for PostGIS with spatial indexing on ward geometries.
 
 -- Wards table with PostGIS geometry

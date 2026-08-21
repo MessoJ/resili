@@ -108,10 +108,10 @@ importers:
 
   packages/demo-scenarios:
     dependencies:
-      '@rezili/risk-core':
+      '@resili/risk-core':
         specifier: workspace:^
         version: link:../risk-core
-      '@rezili/trigger-core':
+      '@resili/trigger-core':
         specifier: workspace:^
         version: link:../trigger-core
     devDependencies:
@@ -235,10 +235,10 @@ importers:
 
   services/api-gateway:
     dependencies:
-      '@rezili/api-contract':
+      '@resili/api-contract':
         specifier: workspace:^
         version: link:../../packages/api-contract
-      '@rezili/store-core':
+      '@resili/store-core':
         specifier: workspace:^
         version: link:../../packages/store-core
     devDependencies:
@@ -254,13 +254,13 @@ importers:
 
   services/demo-runner:
     dependencies:
-      '@rezili/demo-scenarios':
+      '@resili/demo-scenarios':
         specifier: workspace:^
         version: link:../../packages/demo-scenarios
-      '@rezili/ledger-core':
+      '@resili/ledger-core':
         specifier: workspace:^
         version: link:../../packages/ledger-core
-      '@rezili/payout-core':
+      '@resili/payout-core':
         specifier: workspace:^
         version: link:../../packages/payout-core
     devDependencies:

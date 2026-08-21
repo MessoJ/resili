@@ -1,9 +1,9 @@
-# Rezili Progress
+# resili Progress
 
 ## Foundation
 
 - [x] Read and adopt the build plan, including UNEP amendments.
-- [x] Establish the project name as Rezili.
+- [x] Establish the project name as resili.
 - [ ] Verify and selectively harvest upstream infrastructure.
 - [ ] Add reproducible workspace tooling and CI.
 

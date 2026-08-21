@@ -214,8 +214,8 @@ export const DEMO_LEDGER: LedgerData = {
 
 export const DEMO_ALERTS: AlertData[] = [
   {
-    identifier: "REZILI-DEMO-001",
-    sender: "Rezili (decision-support — follow KMD/NDMA)",
+    identifier: "resili-DEMO-001",
+    sender: "resili (decision-support — follow KMD/NDMA)",
     sent: "2026-08-20T12:00:00+03:00",
     status: "Test",
     severity: "Severe",
@@ -228,8 +228,8 @@ export const DEMO_ALERTS: AlertData[] = [
     expires: "2026-08-25T12:00:00+03:00",
   },
   {
-    identifier: "REZILI-DEMO-002",
-    sender: "Rezili (decision-support — follow KMD/NDMA)",
+    identifier: "resili-DEMO-002",
+    sender: "resili (decision-support — follow KMD/NDMA)",
     sent: "2026-08-20T12:00:00+03:00",
     status: "Test",
     severity: "Severe",

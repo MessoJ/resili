@@ -1,5 +1,5 @@
-import { scoreWardRisk, type WardRiskInput } from "@rezili/risk-core";
-import { decideTrigger, type Approval, type TriggerDecision } from "@rezili/trigger-core";
+import { scoreWardRisk, type WardRiskInput } from "@resili/risk-core";
+import { decideTrigger, type Approval, type TriggerDecision } from "@resili/trigger-core";
 
 export const nyandoDemoInput: WardRiskInput = { wardId: "DEMO-NYANDO-001", assessedAt: "2026-08-20T12:00:00Z", forecastProbability: 0.8, forecastLeadDays: 5, riverDischargeRatio: 1.8, exposureScore: 0.7, vulnerabilityScore: 0.6, source: "deterministic-demo-fixture", modelVersion: "risk-v0.1.0" };
 

@@ -69,7 +69,7 @@ export default function CommandCentre() {
         <div className="app-header__brand">
           <div className="app-header__logo">R</div>
           <div>
-            <div className="app-header__title">Rezili Operations Console</div>
+            <div className="app-header__title">resili Operations Console</div>
             <div className="app-header__subtitle">
               Lake Victoria Basin — Climate Risk Intelligence
             </div>

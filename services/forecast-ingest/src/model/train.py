@@ -1,5 +1,5 @@
 """
-Training script for the Rezili flood risk model.
+Training script for the resili flood risk model.
 
 Generates deterministic synthetic training data based on the statistical
 properties of real Nyando catchment flood events, trains the XGBoost

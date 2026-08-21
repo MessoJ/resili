@@ -1,5 +1,5 @@
 [project]
-name = "rezili-forecast-ingest"
+name = "resili-forecast-ingest"
 version = "0.1.0"
 description = "Climate data ingest, feature engineering, and flood risk ML model for the Lake Victoria Basin."
 requires-python = ">=3.11"

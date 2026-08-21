@@ -45,7 +45,7 @@ export function SmePreparednessCard({ ward }: SmePreparednessCardProps) {
         "Keep emergency contact list for Nyando sub-county disaster desk handy",
       ];
 
-  const smsSummary = `[REZILI SME ADVISORY - ${ward.ward_id.replace("KE-039-", "")}] Risk Score: ${ward.score.toFixed(1)} (${ward.band.toUpperCase()}). Action: ${checklist[0]}. Follow official KMD/NDMA directives.`;
+  const smsSummary = `[resili SME ADVISORY - ${ward.ward_id.replace("KE-039-", "")}] Risk Score: ${ward.score.toFixed(1)} (${ward.band.toUpperCase()}). Action: ${checklist[0]}. Follow official KMD/NDMA directives.`;
 
   const handleCopySms = () => {
     // TODO (Teammate 2): Implement navigator.clipboard.writeText(smsSummary)

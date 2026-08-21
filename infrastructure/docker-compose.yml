@@ -2,13 +2,13 @@ services:
   postgis:
     image: postgis/postgis:16-3.4
     environment:
-      POSTGRES_DB: rezili
-      POSTGRES_USER: rezili
-      POSTGRES_PASSWORD: rezili
+      POSTGRES_DB: resili
+      POSTGRES_USER: resili
+      POSTGRES_PASSWORD: resili
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U rezili -d rezili"]
+      test: ["CMD-SHELL", "pg_isready -U resili -d resili"]
       interval: 5s
       timeout: 3s
       retries: 12
@@ -34,7 +34,7 @@ services:
     ports:
       - "8001:8001"
     environment:
-      DATABASE_URL: postgresql://rezili:rezili@postgis:5432/rezili
+      DATABASE_URL: postgresql://resili:resili@postgis:5432/resili
       REDIS_URL: redis://redis:6379
     depends_on:
       postgis:
@@ -49,7 +49,7 @@ services:
     environment:
       GATEWAY_PORT: "8080"
       ML_SERVICE_URL: http://forecast-ingest:8001
-      DATABASE_URL: postgresql://rezili:rezili@postgis:5432/rezili
+      DATABASE_URL: postgresql://resili:resili@postgis:5432/resili
     depends_on:
       postgis:
         condition: service_healthy

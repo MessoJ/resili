@@ -1,4 +1,4 @@
-module github.com/rezili/gateway
+module github.com/resili/gateway
 
 go 1.22
 

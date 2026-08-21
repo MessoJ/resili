@@ -23,8 +23,8 @@ func NewAlertHandler(mlServiceURL string) *AlertHandler {
 		{
 			XMLName:    xml.Name{Local: "alert"},
 			XMLNS:      "urn:oasis:names:tc:emergency:cap:1.2",
-			Identifier: "REZILI-DEMO-001",
-			Sender:     "Rezili (decision-support only — follow KMD/NDMA directives)",
+			Identifier: "resili-DEMO-001",
+			Sender:     "resili (decision-support only — follow KMD/NDMA directives)",
 			Sent:       "2026-08-20T12:00:00+03:00",
 			Status:     "Test",
 			MsgType:    "Alert",

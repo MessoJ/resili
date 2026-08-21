@@ -1,5 +1,5 @@
 """
-FastAPI server for the Rezili flood risk ML model.
+FastAPI server for the resili flood risk ML model.
 
 Exposes a REST API that accepts ward feature vectors and returns
 explainable risk predictions. This service sits behind the Go API
@@ -34,7 +34,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title="Rezili Flood Risk ML API",
+    title="resili Flood Risk ML API",
     description=(
         "Impact-based flood risk scoring for the Lake Victoria Basin. "
         "Scores are decision-support estimates, not certainties. "

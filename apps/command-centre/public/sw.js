@@ -4,7 +4,7 @@
 // Caches ward risk scores and critical UI assets locally on device
 // so county officers and chiefs can operate during low-bandwidth or offline conditions (+1 bonus point).
 
-const CACHE_NAME = "rezili-offline-v1";
+const CACHE_NAME = "resili-offline-v1";
 const OFFLINE_URLS = [
   "/",
   "/favicon.ico",

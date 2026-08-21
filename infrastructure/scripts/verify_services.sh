@@ -8,7 +8,7 @@
 
 set -e
 
-echo "=== REZILI INFRASTRUCTURE HEALTH CHECK ==="
+echo "=== resili INFRASTRUCTURE HEALTH CHECK ==="
 
 echo "1. Checking Python ML Forecast Service (port 8001)..."
 curl -s -f http://localhost:8001/health || echo "ML service offline"

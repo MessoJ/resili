@@ -1,5 +1,5 @@
 {
-  "name": "rezili",
+  "name": "resili",
   "version": "0.1.0",
   "private": true,
   "description": "Open climate-risk intelligence and anticipatory-action infrastructure for the Lake Victoria Basin.",
@@ -13,7 +13,7 @@
     "test": "turbo test",
     "typecheck": "turbo typecheck",
     "dev": "turbo dev",
-    "demo:seed": "pnpm --filter @rezili/db demo:seed"
+    "demo:seed": "pnpm --filter @resili/db demo:seed"
   },
   "devDependencies": {
     "@types/node": "^22.20.1",

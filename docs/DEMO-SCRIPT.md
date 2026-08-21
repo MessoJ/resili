@@ -33,7 +33,7 @@ Open the Operations Console portal. The map shows 5 wards around Lake
 Victoria. Two are red (Nyando, Budalangi), one orange (Nzoia), one
 yellow (Kano), one green (Rachuonyo).
 
-> "This is the Rezili Operations Console. Each ward on this map has a live
+> "This is the resili Operations Console. Each ward on this map has a live
 > risk score. Nyando is red — score 82 out of 100, severe band. But
 > what does that number mean? Let me click on it."
 
@@ -79,7 +79,7 @@ Go to the Trigger panel in the dashboard.
 
 > "Now the score is 82 and lead time is 4 days. That meets our trigger
 > threshold. But we can't just send money — that would be reckless.
-> Rezili requires two-person approval."
+> resili requires two-person approval."
 
 Show the approval workflow:
 1. County officer approves

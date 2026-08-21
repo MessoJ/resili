@@ -26,8 +26,8 @@ func TestHealthEndpoint(t *testing.T) {
 	if resp.Status != "healthy" {
 		t.Errorf("expected status 'healthy', got %q", resp.Status)
 	}
-	if resp.Service != "rezili-gateway" {
-		t.Errorf("expected service 'rezili-gateway', got %q", resp.Service)
+	if resp.Service != "resili-gateway" {
+		t.Errorf("expected service 'resili-gateway', got %q", resp.Service)
 	}
 }
 
@@ -141,8 +141,8 @@ func TestUSSDMainMenu(t *testing.T) {
 	if !strings.HasPrefix(result, "CON") {
 		t.Errorf("main menu should start with CON, got: %s", result)
 	}
-	if !strings.Contains(result, "Rezili") {
-		t.Error("main menu should contain 'Rezili'")
+	if !strings.Contains(result, "resili") {
+		t.Error("main menu should contain 'resili'")
 	}
 }
 

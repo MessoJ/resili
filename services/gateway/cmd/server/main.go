@@ -1,6 +1,6 @@
-// Package main is the entry point for the Rezili API Gateway.
+// Package main is the entry point for the resili API Gateway.
 //
-// The gateway serves as the public-facing HTTP layer for the Rezili
+// The gateway serves as the public-facing HTTP layer for the resili
 // climate risk intelligence platform. It aggregates data from the
 // Python ML service and TypeScript core packages, applies rate
 // limiting and structured logging, and exposes REST endpoints for
@@ -20,8 +20,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/rezili/gateway/internal/handler"
-	"github.com/rezili/gateway/internal/middleware"
+	"github.com/resili/gateway/internal/handler"
+	"github.com/resili/gateway/internal/middleware"
 )
 
 func main() {
@@ -90,7 +90,7 @@ func main() {
 	signal.Notify(done, os.Interrupt, syscall.SIGTERM)
 
 	go func() {
-		slog.Info("Rezili API Gateway starting", "port", port, "ml_service", mlServiceURL)
+		slog.Info("resili API Gateway starting", "port", port, "ml_service", mlServiceURL)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			slog.Error("Server failed", "error", err)
 			os.Exit(1)

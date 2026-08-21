@@ -8,7 +8,7 @@
 
 Every year the rains come to western Kenya and people near the Nyando, Nzoia, and Yala rivers wait to see if this season will be the one that floods their homes. KMD issues forecasts. NDMA coordinates response. But the gap between a national 5-day forecast and a ward chief knowing whether to move people out of Kano Plains — that gap is measured in hours nobody has and data nobody can access.
 
-Rezili closes that gap. It takes public forecast data from GloFAS, CHIRPS, and Open-Meteo, downscales it to the ward level using terrain and historical flood exposure, scores the combined risk with an explainable ML model, and — when the score crosses a transparent threshold with two-person approval — triggers an anticipatory cash transfer through M-Pesa before the water arrives.
+resili closes that gap. It takes public forecast data from GloFAS, CHIRPS, and Open-Meteo, downscales it to the ward level using terrain and historical flood exposure, scores the combined risk with an explainable ML model, and — when the score crosses a transparent threshold with two-person approval — triggers an anticipatory cash transfer through M-Pesa before the water arrives.
 
 It's not a weather app. It's a decision-support system that turns "it might rain a lot" into "Kochogo ward has a 78% chance of exceeding flood stage in 4 days — here's who to notify and here's the pre-approved payout."
 
@@ -74,8 +74,8 @@ All data is publicly available and properly attributed:
 
 ```bash
 # 1. Clone and install TypeScript packages
-git clone https://github.com/your-org/rezili.git
-cd rezili
+git clone https://github.com/your-org/resili.git
+cd resili
 pnpm install
 pnpm test
 
@@ -100,7 +100,7 @@ docker compose up
 
 ## Safety
 
-Forecasts are probabilistic estimates, not certainty. Rezili supports, rather than replaces, Kenyan public warning authorities:
+Forecasts are probabilistic estimates, not certainty. resili supports, rather than replaces, Kenyan public warning authorities:
 
 - Scores are **decision-support estimates**, not predictions of what will happen
 - All alerts attribute **KMD** and **NDMA** as the authoritative sources
@@ -112,7 +112,7 @@ See [`SECURITY.md`](SECURITY.md) and [`DO-NO-HARM.md`](DO-NO-HARM.md).
 
 ## SDG Alignment
 
-| SDG | How Rezili contributes |
+| SDG | How resili contributes |
 |---|---|
 | **SDG 1** (No Poverty) | Anticipatory cash transfers protect livelihoods before disaster |
 | **SDG 6** (Clean Water) | Lake Victoria water-body-adjacent monitoring |
@@ -122,7 +122,7 @@ See [`SECURITY.md`](SECURITY.md) and [`DO-NO-HARM.md`](DO-NO-HARM.md).
 
 ## Credits
 
-Rezili is built for the Zone01 Kisumu GreenTech Hackathon 2026 (Track 6: Climate Risk Intelligence). It selectively adapts verified infrastructure patterns from Kilimo Halisi; adapted source and test provenance is recorded alongside each imported component.
+Resili is built for the Zone01 Kisumu GreenTech Hackathon 2026 (Track 6: Climate Risk Intelligence). It selectively adapts verified infrastructure patterns from Kilimo Halisi; adapted source and test provenance is recorded alongside each imported component.
 
 ## Licence
 

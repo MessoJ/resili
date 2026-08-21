@@ -1,6 +1,6 @@
 # Team Roles & Codebase Assignment
 
-Welcome to **Rezili** (Track 6: Climate Risk Intelligence, Zone01 Kisumu GreenTech Hackathon 2026).
+Welcome to **resili** (Track 6: Climate Risk Intelligence, Zone01 Kisumu GreenTech Hackathon 2026).
 Here is how our 5-person team is structured and the exact files each person owns.
 
 ---

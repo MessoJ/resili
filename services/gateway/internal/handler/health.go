@@ -1,5 +1,5 @@
 // Package handler implements the HTTP endpoint handlers for the
-// Rezili API Gateway.
+// resili API Gateway.
 package handler
 
 import (
@@ -21,7 +21,7 @@ type healthResponse struct {
 func Health(w http.ResponseWriter, r *http.Request) {
 	resp := healthResponse{
 		Status:    "healthy",
-		Service:   "rezili-gateway",
+		Service:   "resili-gateway",
 		Version:   "0.1.0",
 		Timestamp: time.Now().UTC().Format(time.RFC3339),
 	}

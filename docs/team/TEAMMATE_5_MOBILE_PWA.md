@@ -1,7 +1,7 @@
 # Teammate 5: Mobile & Offline UX Guide
 
 ## Your Mission
-Ensure Rezili functions reliably for community members using feature phones via USSD and county field officers working in low-bandwidth / offline conditions (+1 bonus point in rubric).
+Ensure resili functions reliably for community members using feature phones via USSD and county field officers working in low-bandwidth / offline conditions (+1 bonus point in rubric).
 
 ## Files You Own
 - `apps/command-centre/public/sw.js` (Service Worker)

@@ -45,7 +45,7 @@ func processUSSDInput(input string) string {
 	switch input {
 	case "":
 		// Main menu
-		return "CON Karibu Rezili\n" +
+		return "CON Karibu resili\n" +
 			"Habari za hatari ya mafuriko\n\n" +
 			"1. Hatari ya mafuriko\n" +
 			"2. Ripoti tukio\n" +
@@ -85,7 +85,7 @@ func processUSSDInput(input string) string {
 
 	case "4":
 		// Help
-		return "END Rezili ni mfumo wa usaidizi wa maamuzi\n" +
+		return "END resili ni mfumo wa usaidizi wa maamuzi\n" +
 			"ya hatari ya mafuriko kwa Bonde la\n" +
 			"Ziwa Victoria.\n\n" +
 			"Hauchukui nafasi ya KMD au NDMA.\n" +

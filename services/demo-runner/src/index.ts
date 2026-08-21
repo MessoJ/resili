@@ -1,6 +1,6 @@
-import { runNyandoDemo } from "@rezili/demo-scenarios";
-import { appendEvent, verifyChain, type LedgerEvent } from "@rezili/ledger-core";
-import { MockPayoutAdapter } from "@rezili/payout-core";
+import { runNyandoDemo } from "@resili/demo-scenarios";
+import { appendEvent, verifyChain, type LedgerEvent } from "@resili/ledger-core";
+import { MockPayoutAdapter } from "@resili/payout-core";
 
 export function runDemonstration(): { eligible: boolean; payoutId: string | null; ledgerValid: boolean } {
   const decision = runNyandoDemo([{ approverId: "county-officer", approvedAt: "2026-08-20T12:01:00Z" }, { approverId: "ndma-observer", approvedAt: "2026-08-20T12:02:00Z" }]);

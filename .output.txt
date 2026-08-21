@@ -1,0 +1,214 @@
+Command finished with exit code 0.
+Command output:
+
+> resili@0.1.0 typecheck /home/bocal/resili
+> turbo typecheck
+
+
+   • Packages in scope: @resili/alert-core, @resili/api-contract, @resili/demo-runner, @resili/demo-scenarios, @resili/ledger-core, @resili/payout-core, @resili/risk-core, @resili/trigger-core
+   • Running typecheck in 8 packages
+   • Remote caching disabled
+
+@resili/ledger-core:typecheck: cache hit, replaying logs 383d6c1dd17a3c08
+@resili/ledger-core:typecheck:
+@resili/ledger-core:typecheck: > @resili/ledger-core@0.1.0 typecheck /home/bocal/resili/packages/ledger-core
+@resili/ledger-core:typecheck: > tsc --noEmit
+@resili/ledger-core:typecheck:
+@resili/alert-core:typecheck: cache hit, replaying logs 27775ab708c851e3
+@resili/api-contract:typecheck: cache hit, replaying logs bb9d4d7271199e0e
+@resili/alert-core:typecheck:
+@resili/alert-core:typecheck: > @resili/alert-core@0.1.0 typecheck /home/bocal/resili/packages/alert-core
+@resili/alert-core:typecheck: > tsc --noEmit
+@resili/alert-core:typecheck:
+@resili/trigger-core:typecheck: cache hit, replaying logs cec4fd6a342d45ba
+@resili/api-contract:typecheck:
+@resili/api-contract:typecheck: > @resili/api-contract@0.1.0 typecheck /home/bocal/resili/packages/api-contract
+@resili/api-contract:typecheck: > tsc --noEmit
+@resili/api-contract:typecheck:
+@resili/trigger-core:typecheck:
+@resili/trigger-core:typecheck: > @resili/trigger-core@0.1.0 typecheck /home/bocal/resili/packages/trigger-core
+@resili/trigger-core:typecheck: > tsc --noEmit
+@resili/trigger-core:typecheck:
+@resili/payout-core:typecheck: cache hit, replaying logs 832206272e5cdfac
+@resili/payout-core:typecheck:
+@resili/payout-core:typecheck: > @resili/payout-core@0.1.0 typecheck /home/bocal/resili/packages/payout-core
+@resili/payout-core:typecheck: > tsc --noEmit
+@resili/payout-core:typecheck:
+@resili/risk-core:typecheck: cache hit, replaying logs 109601cb900029ad
+@resili/risk-core:typecheck:
+@resili/risk-core:typecheck: > @resili/risk-core@0.1.0 typecheck /home/bocal/resili/packages/risk-core
+@resili/risk-core:typecheck: > tsc --noEmit
+@resili/risk-core:typecheck:
+@resili/demo-scenarios:typecheck: cache hit, replaying logs 13f8e49f467ee6c9
+@resili/demo-scenarios:typecheck:
+@resili/demo-scenarios:typecheck: > @resili/demo-scenarios@0.1.0 typecheck /home/bocal/resili/packages/demo-scenarios
+@resili/demo-scenarios:typecheck: > tsc --noEmit
+@resili/demo-scenarios:typecheck:
+@resili/demo-runner:typecheck: cache hit, replaying logs 8237341b8e7fd479
+@resili/demo-runner:typecheck:
+@resili/demo-runner:typecheck: > @resili/demo-runner@0.1.0 typecheck /home/bocal/resili/services/demo-runner
+@resili/demo-runner:typecheck: > tsc --noEmit
+@resili/demo-runner:typecheck:
+
+ Tasks:    8 successful, 8 total
+Cached:    8 cached, 8 total
+  Time:    118ms >>> FULL TURBO
+
+
+> resili@0.1.0 test /home/bocal/resili
+> turbo test
+
+
+   • Packages in scope: @resili/alert-core, @resili/api-contract, @resili/demo-runner, @resili/demo-scenarios, @resili/ledger-core, @resili/payout-core, @resili/risk-core, @resili/trigger-core
+   • Running test in 8 packages
+   • Remote caching disabled
+
+@resili/trigger-core:test: cache hit, replaying logs e18754f96b4d18bd
+@resili/trigger-core:test:
+@resili/trigger-core:test: > @resili/trigger-core@0.1.0 test /home/bocal/resili/packages/trigger-core
+@resili/trigger-core:test: > vitest run
+@resili/trigger-core:test:
+@resili/trigger-core:test:
+@resili/trigger-core:test:  RUN  v3.2.7 /home/bocal/resili/packages/trigger-core
+@resili/trigger-core:test:
+@resili/trigger-core:test:  ✓ src/__tests__/index.test.ts (2 tests) 22ms
+@resili/trigger-core:test:
+@resili/trigger-core:test:  Test Files  1 passed (1)
+@resili/trigger-core:test:       Tests  2 passed (2)
+@resili/trigger-core:test:    Start at  19:26:03
+@resili/trigger-core:test:    Duration  3.26s (transform 364ms, setup 0ms, collect 250ms, tests 22ms, environment 0ms, prepare 765ms)
+@resili/trigger-core:test:
+@resili/payout-core:test: cache hit, replaying logs 9271298834899212
+@resili/api-contract:test: cache hit, replaying logs f4a498abd658aee2
+@resili/payout-core:test:
+@resili/payout-core:test: > @resili/payout-core@0.1.0 test /home/bocal/resili/packages/payout-core
+@resili/payout-core:test: > vitest run
+@resili/payout-core:test:
+@resili/payout-core:test:
+@resili/alert-core:test: cache hit, replaying logs 650a5b3b3a346735
+@resili/alert-core:test:
+@resili/alert-core:test: > @resili/alert-core@0.1.0 test /home/bocal/resili/packages/alert-core
+@resili/alert-core:test: > vitest run
+@resili/alert-core:test:
+@resili/alert-core:test:
+@resili/alert-core:test:  RUN  v3.2.7 /home/bocal/resili/packages/alert-core
+@resili/alert-core:test:
+@resili/alert-core:test:  ✓ src/__tests__/index.test.ts (1 test) 7ms
+@resili/alert-core:test:
+@resili/alert-core:test:  Test Files  1 passed (1)
+@resili/payout-core:test:  RUN  v3.2.7 /home/bocal/resili/packages/payout-core
+@resili/alert-core:test:       Tests  1 passed (1)
+@resili/alert-core:test:    Start at  19:26:04
+@resili/alert-core:test:    Duration  2.62s (transform 368ms, setup 0ms, collect 223ms, tests 7ms, environment 1ms, prepare 673ms)
+@resili/payout-core:test:
+@resili/payout-core:test:  ✓ src/__tests__/index.test.ts (1 test) 24ms
+@resili/payout-core:test:
+@resili/payout-core:test:  Test Files  1 passed (1)
+@resili/payout-core:test:       Tests  1 passed (1)
+@resili/payout-core:test:    Start at  19:26:03
+@resili/payout-core:test:    Duration  3.28s (transform 314ms, setup 0ms, collect 192ms, tests 24ms, environment 2ms, prepare 1.02s)
+@resili/payout-core:test:
+@resili/alert-core:test:
+@resili/api-contract:test:
+@resili/api-contract:test: > @resili/api-contract@0.1.0 test /home/bocal/resili/packages/api-contract
+@resili/api-contract:test: > vitest run
+@resili/api-contract:test:
+@resili/api-contract:test:
+@resili/api-contract:test:  RUN  v3.2.7 /home/bocal/resili/packages/api-contract
+@resili/api-contract:test:
+@resili/api-contract:test:  ✓ src/__tests__/index.test.ts (1 test) 22ms
+@resili/api-contract:test:
+@resili/api-contract:test:  Test Files  1 passed (1)
+@resili/api-contract:test:       Tests  1 passed (1)
+@resili/api-contract:test:    Start at  19:26:03
+@resili/api-contract:test:    Duration  2.91s (transform 277ms, setup 0ms, collect 193ms, tests 22ms, environment 0ms, prepare 271ms)
+@resili/api-contract:test:
+@resili/risk-core:build: cache hit, replaying logs bc4c75c663580d9e
+@resili/risk-core:build:
+@resili/risk-core:build: > @resili/risk-core@0.1.0 build /home/bocal/resili/packages/risk-core
+@resili/risk-core:build: > tsc --noEmit
+@resili/risk-core:build:
+@resili/ledger-core:test: cache hit, replaying logs 3510251fdb1e3566
+@resili/ledger-core:test:
+@resili/ledger-core:test: > @resili/ledger-core@0.1.0 test /home/bocal/resili/packages/ledger-core
+@resili/ledger-core:test: > vitest run
+@resili/ledger-core:test:
+@resili/ledger-core:test:
+@resili/ledger-core:test:  RUN  v3.2.7 /home/bocal/resili/packages/ledger-core
+@resili/ledger-core:test:
+@resili/ledger-core:test:  ✓ src/__tests__/index.test.ts (1 test) 14ms
+@resili/ledger-core:test:
+@resili/ledger-core:test:  Test Files  1 passed (1)
+@resili/ledger-core:test:       Tests  1 passed (1)
+@resili/ledger-core:test:    Start at  19:26:03
+@resili/ledger-core:test:    Duration  3.27s (transform 186ms, setup 0ms, collect 182ms, tests 14ms, environment 0ms, prepare 945ms)
+@resili/ledger-core:test:
+@resili/payout-core:build: cache hit, replaying logs 39cb0c6d01437d54
+@resili/payout-core:build:
+@resili/payout-core:build: > @resili/payout-core@0.1.0 build /home/bocal/resili/packages/payout-core
+@resili/payout-core:build: > tsc --noEmit
+@resili/payout-core:build:
+@resili/ledger-core:build: cache hit, replaying logs 467fb0029819f1ff
+@resili/ledger-core:build:
+@resili/ledger-core:build: > @resili/ledger-core@0.1.0 build /home/bocal/resili/packages/ledger-core
+@resili/ledger-core:build: > tsc --noEmit
+@resili/ledger-core:build:
+@resili/risk-core:test: cache hit, replaying logs 097ca4372c6491ec
+@resili/risk-core:test:
+@resili/risk-core:test: > @resili/risk-core@0.1.0 test /home/bocal/resili/packages/risk-core
+@resili/risk-core:test: > vitest run
+@resili/risk-core:test:
+@resili/risk-core:test:
+@resili/risk-core:test:  RUN  v3.2.7 /home/bocal/resili/packages/risk-core
+@resili/risk-core:test:
+@resili/risk-core:test:  ✓ src/__tests__/index.test.ts (3 tests) 17ms
+@resili/risk-core:test:
+@resili/risk-core:test:  Test Files  1 passed (1)
+@resili/risk-core:test:       Tests  3 passed (3)
+@resili/risk-core:test:    Start at  19:26:03
+@resili/risk-core:test:    Duration  3.23s (transform 452ms, setup 0ms, collect 282ms, tests 17ms, environment 0ms, prepare 642ms)
+@resili/risk-core:test:
+@resili/trigger-core:build: cache hit, replaying logs 314067caa2d066af
+@resili/trigger-core:build:
+@resili/trigger-core:build: > @resili/trigger-core@0.1.0 build /home/bocal/resili/packages/trigger-core
+@resili/trigger-core:build: > tsc --noEmit
+@resili/trigger-core:build:
+@resili/demo-scenarios:build: cache hit, replaying logs 8bc097d0ef2b232e
+@resili/demo-scenarios:test: cache hit, replaying logs bb3abbd04ca82f35
+@resili/demo-scenarios:build:
+@resili/demo-scenarios:build: > @resili/demo-scenarios@0.1.0 build /home/bocal/resili/packages/demo-scenarios
+@resili/demo-scenarios:build: > tsc --noEmit
+@resili/demo-scenarios:build:
+@resili/demo-scenarios:test:
+@resili/demo-scenarios:test: > @resili/demo-scenarios@0.1.0 test /home/bocal/resili/packages/demo-scenarios
+@resili/demo-scenarios:test: > vitest run
+@resili/demo-scenarios:test:
+@resili/demo-scenarios:test:
+@resili/demo-scenarios:test:  RUN  v3.2.7 /home/bocal/resili/packages/demo-scenarios
+@resili/demo-scenarios:test:
+@resili/demo-scenarios:test:  ✓ src/__tests__/index.test.ts (1 test) 7ms
+@resili/demo-scenarios:test:
+@resili/demo-scenarios:test:  Test Files  1 passed (1)
+@resili/demo-scenarios:test:       Tests  1 passed (1)
+@resili/demo-scenarios:test:    Start at  19:26:09
+@resili/demo-scenarios:test:    Duration  659ms (transform 131ms, setup 0ms, collect 95ms, tests 7ms, environment 0ms, prepare 190ms)
+@resili/demo-scenarios:test:
+@resili/demo-runner:test: cache hit, replaying logs 8f4b7b71f8faadd2
+@resili/demo-runner:test:
+@resili/demo-runner:test: > @resili/demo-runner@0.1.0 test /home/bocal/resili/services/demo-runner
+@resili/demo-runner:test: > vitest run
+@resili/demo-runner:test:
+@resili/demo-runner:test:
+@resili/demo-runner:test:  RUN  v3.2.7 /home/bocal/resili/services/demo-runner
+@resili/demo-runner:test:
+@resili/demo-runner:test:  ✓ src/__tests__/index.test.ts (1 test) 5ms
+@resili/demo-runner:test:
+@resili/demo-runner:test:  Test Files  1 passed (1)
+@resili/demo-runner:test:       Tests  1 passed (1)
+@resili/demo-runner:test:    Start at  19:26:11
+@resili/demo-runner:test:    Duration  526ms (transform 96ms, setup 0ms, collect 98ms, tests 5ms, environment 0ms, prepare 103ms)
+@resili/demo-runner:test:
+
+ Tasks:    13 successful, 13 total
+Cached:    13 cached, 13 total
+  Time:    95ms >>> FULL TURBO

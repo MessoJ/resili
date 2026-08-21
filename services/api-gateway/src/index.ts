@@ -1,5 +1,5 @@
-import { toRiskGeoJson, type PublicRiskRecord } from "@rezili/api-contract";
-import { InMemoryRepository } from "@rezili/store-core";
+import { toRiskGeoJson, type PublicRiskRecord } from "@resili/api-contract";
+import { InMemoryRepository } from "@resili/store-core";
 
 export class RiskReadApi {
   readonly #risks = new InMemoryRepository<PublicRiskRecord & { id: string; createdAt: string }>();

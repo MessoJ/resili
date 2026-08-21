@@ -1,8 +1,8 @@
-# Rezili — Pitch Guide
+# resili — Pitch Guide
 
 ## The One-Liner
 
-> Rezili turns national weather forecasts into ward-level, explainable
+> resili turns national weather forecasts into ward-level, explainable
 > flood risk decisions — and triggers anticipatory cash transfers before
 > the water arrives.
 
@@ -35,7 +35,7 @@ Key statistics to cite:
 
 ## The Solution (3 minutes)
 
-"Rezili is a climate risk intelligence platform for the Lake Victoria
+"resili is a climate risk intelligence platform for the Lake Victoria
 Basin. It does three things that nobody else does together:
 
 1. **Downscales** public forecasts (GloFAS, CHIRPS, Open-Meteo) to the
@@ -48,7 +48,7 @@ Basin. It does three things that nobody else does together:
    Judges can verify this.
 
 3. **Acts** on the score. When risk crosses 75 (severe), lead time
-   exceeds 3 days, and two people approve, Rezili triggers an
+   exceeds 3 days, and two people approve, resili triggers an
    anticipatory cash transfer through M-Pesa. Every decision is
    recorded in a tamper-evident hash chain."
 
@@ -81,7 +81,7 @@ for its job:
 
 ## Innovation (1 minute)
 
-"Three things make Rezili different:
+"Three things make resili different:
 
 1. **Explainable ML at the ward level.** We don't just say 'high risk.'
    We show exactly what forecast signals drove the score, calibrated
@@ -99,7 +99,7 @@ for its job:
 
 ## Impact (1 minute)
 
-"If Rezili were deployed for the April 2024 Nyando floods:
+"If resili were deployed for the April 2024 Nyando floods:
 
 - Ward chiefs would have had a **4-day early warning** with a specific
   risk score, not just 'heavy rain expected.'
@@ -131,7 +131,7 @@ Mention these for the UNEP panellists:
 
 ## Scalability (30 seconds)
 
-"Rezili works for Nyando today. It works for any catchment tomorrow.
+"resili works for Nyando today. It works for any catchment tomorrow.
 The ward profiles, forecast sources, and scoring model are all
 configurable. Swap in Nzoia Basin data, and you have Nzoia coverage.
 The architecture is containerised — one `docker compose up` brings
@@ -143,4 +143,4 @@ everything up."
 
 "We're not replacing KMD or NDMA. We're building the missing layer
 between their forecasts and the ward chief who needs to make a decision
-tonight. That's Rezili."
+tonight. That's resili."
