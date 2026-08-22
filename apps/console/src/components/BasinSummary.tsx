@@ -2,6 +2,7 @@
 
 import React, { useMemo } from "react";
 import type { WardRisk } from "@/lib/types";
+import { formatCount, wardDisplayName } from "@/lib/plain-language";
 
 interface BasinSummaryProps {
   wards: WardRisk[];
@@ -39,31 +40,48 @@ export function BasinSummary({ wards, onSelectWard }: BasinSummaryProps) {
     );
     // Wards in the anticipatory-action window: severe band is the trigger
     // threshold (score >= 75), the same rule the gateway enforces.
-    const actionable = wards.filter((w) => w.score >= 75).length;
-    return { total, counts, mean, peak, actionable };
+    const actionWards = wards.filter((w) => w.score >= 75);
+    const actionable = actionWards.length;
+    // People/households in the wards that require immediate action — the
+    // number an officer is actually triaging, not an internal ratio.
+    const peopleAtRisk = actionWards.reduce(
+      (sum, w) => sum + (w.population_at_risk ?? 0),
+      0
+    );
+    const householdsEligible = actionWards.reduce(
+      (sum, w) => sum + (w.households_eligible ?? 0),
+      0
+    );
+    return { total, counts, mean, peak, actionable, peopleAtRisk, householdsEligible };
   }, [wards]);
 
   if (wards.length === 0) return null;
 
-  const { total, counts, mean, peak, actionable } = stats;
-  const cleanPeak = peak ? peak.ward_id.replace("KE-039-", "") : "—";
+  const { total, counts, mean, peak, actionable, peopleAtRisk, householdsEligible } = stats;
+  const cleanPeak = peak ? wardDisplayName(peak) : "—";
 
   return (
     <section className="basin-summary" aria-label="Basin overview">
+      {actionable > 0 && (
+        <div className="basin-summary__alarm">
+          <span className="basin-summary__alarm-count">{actionable}</span>
+          <span className="basin-summary__alarm-text">
+            {actionable === 1 ? "ward requires" : "wards require"} immediate action
+            <span className="basin-summary__alarm-sub">
+              {formatCount(peopleAtRisk)} people · {formatCount(householdsEligible)} households eligible for KES 500
+            </span>
+          </span>
+        </div>
+      )}
+
       <div className="basin-summary__grid">
         <div className="basin-summary__stat">
           <span className="basin-summary__stat-label">Mean risk index</span>
           <span className="basin-summary__stat-value">{mean.toFixed(1)}</span>
         </div>
         <div className="basin-summary__stat">
-          <span className="basin-summary__stat-label">In action window</span>
-          <span
-            className="basin-summary__stat-value"
-            style={{ color: actionable > 0 ? "var(--risk-severe)" : "var(--text-primary)" }}
-          >
-            {actionable}
-            <span className="basin-summary__stat-suffix">/{total}</span>
-          </span>
+          <span className="basin-summary__stat-label">Wards monitored</span>
+          <span className="basin-summary__stat-value">{total}</span>
         </div>
       </div>
 

@@ -924,3 +924,564 @@ code, .mono { font-family: var(--font-mono); }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
 }
+
+
+/* ============================================================================
+   Redesign v1 — "Command Centre" additions
+   Decision-Maker Abstraction Layer: plain-language, action-first UI on top of
+   the existing instrument-panel design tokens.
+   ============================================================================ */
+
+/* ── Sign-in ───────────────────────────────────────────── */
+.signin {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-lg);
+  position: relative;
+  z-index: 1;
+}
+
+.signin__card {
+  width: 100%;
+  max-width: 460px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-xl);
+}
+
+.signin__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: var(--space-lg);
+}
+
+.signin__mark { color: var(--accent-primary); }
+
+.signin__title {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.signin__subtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.signin__lead {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--space-lg);
+}
+
+.signin__label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: var(--space-md) 0 6px;
+}
+
+.signin__input {
+  width: 100%;
+  padding: 11px 12px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 14px;
+}
+
+.signin__input:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+}
+
+.signin__roles {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.signin__role {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+  padding: 10px 12px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.signin__role:hover { border-color: var(--border-strong); }
+
+.signin__role--active {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary-dim);
+}
+
+.signin__role-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.signin__role-blurb {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.signin__submit {
+  width: 100%;
+  margin-top: var(--space-lg);
+  padding: 12px 16px;
+  background: var(--accent-primary);
+  color: #08110f;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.signin__submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.signin__note {
+  margin-top: var(--space-md);
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ── Header user block ─────────────────────────────────── */
+.app-header__user {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 0 var(--space-md);
+  line-height: 1.2;
+}
+
+.app-header__user-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.app-header__user-role {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.app-header__signout {
+  padding: 6px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.app-header__signout:hover { border-color: var(--border-strong); }
+
+/* ── Tab badge (count of wards needing action) ─────────── */
+.sidebar__tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  margin-left: 6px;
+  padding: 0 4px;
+  border-radius: var(--radius-full);
+  background: var(--risk-severe);
+  color: #120a09;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* ── Detail panel — plain-language redesign ────────────── */
+.detail-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: var(--accent-primary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 16px;
+  padding: 0;
+}
+
+.detail-headline {
+  padding: 12px 14px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  margin-bottom: 12px;
+}
+
+.detail-headline__band {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.detail-headline__text {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--text-primary);
+}
+
+.detail-people {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.detail-people__stat {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.detail-people__value {
+  font-size: 22px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.detail-people__label {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+.detail-action {
+  padding: 12px 14px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-subtle);
+  border-left-width: 4px;
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+}
+
+.detail-action__text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.45;
+}
+
+.detail-action__cta {
+  margin-top: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--accent-danger);
+  color: #120a09;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.detail-tech-toggle {
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+
+.detail-tech-toggle:hover { color: var(--text-secondary); }
+
+.detail-provenance {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ── Key risk drivers ──────────────────────────────────── */
+.drivers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.drivers__item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.drivers__icon {
+  font-size: 18px;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+.drivers__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.drivers__text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+/* ── Audit ledger — plain-language timeline ────────────── */
+.audit-devtoggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.audit-devtoggle input { accent-color: var(--accent-primary); }
+
+.audit-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.audit-entry {
+  display: flex;
+  gap: 12px;
+  padding-bottom: 16px;
+  position: relative;
+}
+
+.audit-entry:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 14px;
+  bottom: 0;
+  width: 2px;
+  background: var(--border-subtle);
+}
+
+.audit-entry__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+  margin-top: 3px;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.audit-entry__body { flex: 1; }
+
+.audit-entry__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.audit-entry__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.audit-entry__time {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.audit-entry__detail {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin-top: 2px;
+}
+
+.audit-entry__tech {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  word-break: break-all;
+}
+
+/* ── Trigger panel — action-first ──────────────────────── */
+.trigger-summary {
+  padding: 12px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.trigger-summary__title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.trigger-summary__line {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.trigger-step--attention {
+  border-radius: var(--radius-md);
+  outline: 2px solid var(--accent-warning);
+  outline-offset: 4px;
+}
+
+.approve-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.approve-row input { accent-color: var(--accent-primary); }
+
+.approve-row--disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.approve-row__lock {
+  font-style: normal;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.trigger-authorise {
+  width: 100%;
+  padding: 15px 16px;
+  border-radius: var(--radius-md);
+  background: var(--bg-inset);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: not-allowed;
+  transition: transform var(--transition-fast);
+}
+
+.trigger-authorise--ready {
+  background: var(--accent-danger);
+  color: #120a09;
+  border-color: var(--accent-danger);
+  cursor: pointer;
+  box-shadow: 0 0 0 4px rgba(207, 80, 73, 0.18);
+  animation: authorise-pulse 1.8s ease-in-out infinite;
+}
+
+.trigger-authorise--ready:hover { transform: translateY(-1px); }
+
+@keyframes authorise-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(207, 80, 73, 0.14); }
+  50% { box-shadow: 0 0 0 7px rgba(207, 80, 73, 0.05); }
+}
+
+.trigger-reset {
+  margin-top: 12px;
+  padding: 6px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+/* ── Basin summary — urgent action alarm ───────────────── */
+.basin-summary__alarm {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  background: var(--risk-severe-bg);
+  border: 1px solid rgba(207, 80, 73, 0.35);
+  border-radius: var(--radius-md);
+}
+
+.basin-summary__alarm-count {
+  font-family: var(--font-mono);
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--risk-severe);
+}
+
+.basin-summary__alarm-text {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.25;
+}
+
+.basin-summary__alarm-sub {
+  margin-top: 3px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}

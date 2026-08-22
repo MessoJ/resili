@@ -11,6 +11,17 @@ export interface WardRisk {
   source: string;
   latitude: number;
   longitude: number;
+  /**
+   * Optional human-facing operational fields. These are additive: when the
+   * gateway/ML service provides them they drive the plain-language "command
+   * centre" view; when absent the console degrades gracefully to derived text.
+   */
+  ward_name?: string;
+  river?: string;
+  population_at_risk?: number;
+  households_eligible?: number;
+  /** Forecast lead window the score applies to, e.g. 4 (days ahead). */
+  forecast_horizon_days?: number;
 }
 
 export interface LedgerEvent {

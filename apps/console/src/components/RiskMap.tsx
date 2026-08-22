@@ -5,6 +5,7 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import type { WardRisk } from "@/lib/types";
 import { WARD_POLYGONS, WARD_POLYGON_BY_ID } from "@/lib/ward-polygons";
+import { wardDisplayName } from "@/lib/plain-language";
 
 interface RiskMapProps {
   wards: WardRisk[];
@@ -217,7 +218,7 @@ export default function RiskMap({
           border: 2px solid ${isSelected ? "#e9efec" : "rgba(233,239,236,0.65)"};
           font-size: ${isSelected ? "12px" : "11px"};
         ">${Math.round(ward.score)}</div>
-        <div class="ward-marker__label">${ward.ward_id.replace("KE-039-", "")}</div>
+        <div class="ward-marker__label">${wardDisplayName(ward)}</div>
       `;
       el.addEventListener("click", (ev) => {
         ev.stopPropagation();

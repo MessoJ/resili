@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import type { WardRisk } from "@/lib/types";
+import { bandLabel, formatCount, wardDisplayName } from "@/lib/plain-language";
 
 interface WardListProps {
   wards: WardRisk[];
@@ -53,7 +54,7 @@ export function WardList({ wards, onSelectWard }: WardListProps) {
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         {filteredWards.map((ward) => {
           const color = BAND_COLORS[ward.band] || "#6aa5b5";
-          const cleanName = ward.ward_id.replace("KE-039-", "");
+          const cleanName = wardDisplayName(ward);
 
           return (
             <div
@@ -66,15 +67,12 @@ export function WardList({ wards, onSelectWard }: WardListProps) {
                 <div>
                   <div className="ward-card__name">{cleanName} Ward</div>
                   <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>
-                    ID: {ward.ward_id}
+                    {formatCount(ward.population_at_risk)} people at risk
                   </div>
                 </div>
                 <div style={{ textAlign: "right" }}>
-                  <div className="ward-card__score" style={{ color }}>
-                    {ward.score.toFixed(1)}
-                  </div>
                   <span className={`ward-card__band ward-card__band--${ward.band}`}>
-                    {ward.band}
+                    {bandLabel(ward.band)}
                   </span>
                 </div>
               </div>
@@ -90,7 +88,7 @@ export function WardList({ wards, onSelectWard }: WardListProps) {
                 />
               </div>
 
-              {/* Key Signal preview */}
+              {/* Plain-language action signal */}
               <div
                 style={{
                   marginTop: "8px",
@@ -100,8 +98,10 @@ export function WardList({ wards, onSelectWard }: WardListProps) {
                   justifyContent: "space-between",
                 }}
               >
-                <span>GloFAS: {(ward.feature_contributions.discharge_ratio || 1.0).toFixed(1)}x mean</span>
-                <span>Precip (3d): {(ward.feature_contributions.precip_3day_sum || 0).toFixed(1)} pts</span>
+                <span>{formatCount(ward.households_eligible)} households eligible</span>
+                <span style={{ color: ward.score >= 75 ? "var(--risk-severe)" : "var(--text-muted)", fontWeight: 600 }}>
+                  {ward.score >= 75 ? "Action needed" : "Monitoring"}
+                </span>
               </div>
             </div>
           );
